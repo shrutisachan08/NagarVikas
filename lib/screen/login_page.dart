@@ -1,0 +1,276 @@
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:NagarVikas/screen/issue_selection.dart';
+import 'package:NagarVikas/screen/register_screen.dart';
+import 'package:NagarVikas/screen/admin_dashboard.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool isLoading = false;
+
+  Future<void> _loginUser() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      String email = _emailController.text.trim();
+      String password = _passwordController.text.trim();
+
+      if (email.isEmpty || password.isEmpty) {
+        Fluttertoast.showToast(msg: "Please enter both email and password");
+        setState(() => isLoading = false);
+        return;
+      }
+
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      User? user = userCredential.user;
+
+      // ✅ Check if email is verified
+      if (user != null && !user.emailVerified) {
+        Fluttertoast.showToast(
+            msg: "Please verify your email before logging in.");
+        await _auth.signOut();
+        setState(() => isLoading = false);
+        return;
+      }
+
+      Fluttertoast.showToast(msg: "Login Successful!");
+
+      if (email.contains("gov")) {
+        await Future.delayed(Duration(milliseconds: 3000));
+        _showAdminPinDialog(email);
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => IssueSelectionPage()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      Fluttertoast.showToast(
+          msg: e.message ?? "Login failed. Please try again.");
+    } catch (e) {
+      Fluttertoast.showToast(msg: "An unexpected error occurred.");
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void _showAdminPinDialog(String email) {
+    TextEditingController pinController = TextEditingController();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Admin Authentication"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Enter Admin PIN to access the dashboard."),
+              TextField(
+                controller: pinController,
+                obscureText: true,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: "Enter 4-digit PIN",
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (pinController.text == "2004") {
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool("isAdmin", true);
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminDashboard()),
+                  );
+                } else {
+                  Fluttertoast.showToast(msg: "Incorrect PIN! Access Denied.");
+                }
+              },
+              child: const Text("Submit"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _forgotPassword() async {
+    String email = _emailController.text.trim();
+    if (email.isEmpty) {
+      Fluttertoast.showToast(msg: "Please enter your email to reset password.");
+      return;
+    }
+
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      Fluttertoast.showToast(msg: "Password reset link sent to $email");
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Error sending reset email.");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 80),
+            FadeInUp(
+              duration: const Duration(milliseconds: 1000),
+              child: const Text(
+                "Welcome Back!",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+              ),
+            ),
+            const SizedBox(height: 10),
+            ZoomIn(
+              duration: const Duration(milliseconds: 1200),
+              child: Image.asset("assets/login.png", height: 250, width: 250),
+            ),
+            const SizedBox(height: 30),
+            FadeInUp(
+              duration: const Duration(milliseconds: 1200),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: "Email",
+                    labelStyle: const TextStyle(color: Colors.black87),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+            FadeInUp(
+              duration: const Duration(milliseconds: 1300),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            FadeInUp(
+              duration: const Duration(milliseconds: 1300),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 25),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _forgotPassword,
+                    child: const Text(
+                      "Forgot Password?",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            FadeInUp(
+              duration: const Duration(milliseconds: 1400),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 100, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: isLoading ? null : _loginUser,
+                child: isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "Login",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 15),
+            FadeInUp(
+              duration: const Duration(milliseconds: 1500),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegisterScreen()));
+                },
+                child: const Text(
+                  "Don't have an account? Signup",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+     ),
+);
+}
+}

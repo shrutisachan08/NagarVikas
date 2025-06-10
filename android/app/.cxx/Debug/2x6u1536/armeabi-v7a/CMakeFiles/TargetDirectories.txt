@@ -1,0 +1,2 @@
+C:/prateek/NagarVikas/android/app/.cxx/Debug/2x6u1536/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/prateek/NagarVikas/android/app/.cxx/Debug/2x6u1536/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,2 @@
+C:/prateek/NagarVikas/android/app/.cxx/RelWithDebInfo/2p6r2f4t/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/prateek/NagarVikas/android/app/.cxx/RelWithDebInfo/2p6r2f4t/arm64-v8a/CMakeFiles/rebuild_cache.dir
