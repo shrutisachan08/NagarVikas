@@ -55,7 +55,7 @@
 ## 🧑‍💻 Project Admin
 
 *Prateek Chourasia*  
-📧 prateek9876@gmail.com  
+📧 prateekchourasia9876@gmail.com  
 🌐 [GitHub Profile](https://github.com/Prateek9876)
 
 ---
