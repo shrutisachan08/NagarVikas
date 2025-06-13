@@ -49,7 +49,7 @@ void main() async {
       ),
     );
   } else {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(); // This might fail if no default options
   }
   // ✅ Register background handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -157,7 +157,8 @@ Future<void> handleAdminLogin(BuildContext context) async {
 // ✅ Logout Function (Clears Admin Status & Redirects to Login)
 Future<void> handleLogout(BuildContext context) async {
   // Clear stored admin status
-  final prefs = await SharedPreferences.getInstance(); 
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('isAdmin'); // ✅ Clear admin status 
   await firebase_auth.FirebaseAuth.instance.signOut(); 
   Navigator.pushReplacement( // ✅ Redirect to Login Page
       context, MaterialPageRoute(builder: (context) => const LoginPage())); // ✅ Fix: Use const for LoginPage to avoid unnecessary rebuilds
