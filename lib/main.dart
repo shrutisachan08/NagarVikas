@@ -1,3 +1,4 @@
+import 'package:NagarVikas/service/ConnectivityService.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
@@ -45,6 +46,7 @@ void main() async {
     await Firebase.initializeApp();
   }
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await ConnectivityService().initialize();
   runApp(const MyApp());
 }
 
@@ -61,7 +63,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const AuthCheckScreen(),
+      home: ConnectivityOverlay(child: const AuthCheckScreen()),
     );
   }
 }
