@@ -4,6 +4,10 @@ import 'package:firebase_database/firebase_database.dart';
 
 import 'login_page.dart';
 
+/// 🛠️ AdminDashboard
+/// Admin dashboard to view, search, and manage user complaints in real-time.
+/// Pulls data from Firebase Realtime Database and supports real-time updates.
+
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
@@ -12,20 +16,26 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
+  // 🔢 Complaint counters
   int totalComplaints = 0;
   int pendingComplaints = 0;
   int inProgressComplaints = 0;
   int resolvedComplaints = 0;
+
+  // 📦 Complaint data storage
   List<Map<String, dynamic>> complaints = [];
   List<Map<String, dynamic>> filteredComplaints = [];
+
+  // Controller for the top search bar
   TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _fetchComplaints();
+    _fetchComplaints();  // 📥 Fetch complaints on load
   }
 
+  /// 🔄 Fetches all complaints and enriches them with user info from Firebase
   Future<void> _fetchComplaints() async {
     DatabaseReference complaintsRef = FirebaseDatabase.instance.ref('complaints');
     DatabaseReference usersRef = FirebaseDatabase.instance.ref('users');
@@ -33,6 +43,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     complaintsRef.onValue.listen((complaintEvent) async {
       final complaintData = complaintEvent.snapshot.value as Map<dynamic, dynamic>?;
 
+      // If no data exists
       if (complaintData == null) {
         setState(() {
           totalComplaints = pendingComplaints = inProgressComplaints = resolvedComplaints = 0;
@@ -42,6 +53,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         return;
       }
 
+      // 🧾 Parsing and enriching complaint data with user info
       List<Map<String, dynamic>> loadedComplaints = [];
       int pending = 0, inProgress = 0, resolved = 0, total = 0;
 
@@ -49,16 +61,19 @@ class _AdminDashboardState extends State<AdminDashboard> {
         final complaint = entry.value as Map<dynamic, dynamic>;
         String userId = complaint["user_id"] ?? "Unknown";
 
+        // 👤 Fetch user details
         DataSnapshot userSnapshot = await usersRef.child(userId).get();
         Map<String, dynamic>? userData =
             userSnapshot.value != null ? Map<String, dynamic>.from(userSnapshot.value as Map) : null;
 
+        // ⏳ Complaint status classification
         String status = complaint["status"]?.toString() ?? "Pending";
         if (status == "Pending") pending++;
         if (status == "In Progress") inProgress++;
         if (status == "Resolved") resolved++;
         total++;
 
+        // 📅 Timestamp parsing
         String timestamp = complaint["timestamp"] ?? "Unknown";
         String date = "Unknown", time = "Unknown";
 
@@ -68,6 +83,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           time = "${dateTime.hour}:${dateTime.minute}";
         }
 
+        // 📋 Building complaint object
         loadedComplaints.add({
           "id": entry.key,
           "issue_type": complaint["issue_type"] ?? "Unknown",
@@ -85,6 +101,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         });
       }
 
+      // 🆙 Update UI state
       setState(() {
         totalComplaints = total;
         pendingComplaints = pending;
@@ -96,6 +113,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     });
   }
 
+  /// 🔍 Filters displayed complaints live as the admin types
   void _searchComplaints(String query) {
     setState(() {
       filteredComplaints = complaints.where((complaint) {
@@ -105,10 +123,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
     });
   }
 
+  /// 🔄 Updates the status of a complaint
   void _updateComplaintStatus(String complaintId, String newStatus) {
     FirebaseDatabase.instance.ref('complaints/$complaintId').update({"status": newStatus});
   }
 
+  /// 🔓 Logs the admin out with confirmation dialog and redirects to LoginPage
   void _logout(BuildContext context) {
     showDialog(
       context: context,
@@ -133,8 +153,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        return false;
+      onWillPop: () async {   
+        return false;   // 🚫 Prevent back navigation to avoid unintended logout or state loss
       },
       child: Scaffold(
         appBar: AppBar(
@@ -162,6 +182,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
               onChanged: _searchComplaints,
             ),
             const SizedBox(height: 20),
+
+            // 📋 Complaints ListView
             Expanded(
               child: ListView.builder(
                 itemCount: filteredComplaints.length,
@@ -196,6 +218,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     ));
   }
 
+  /// 📄 Shows full details of a selected complaint with status editing
   void _showComplaintDetails(BuildContext context, Map<String, dynamic> complaint) {
   String selectedStatus = complaint["status"];
 
@@ -226,6 +249,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 Text(complaint["description"], style: TextStyle(color: Colors.grey[700])),
                 const SizedBox(height: 10),
                 Text("🔄 Status:", style: TextStyle(fontWeight: FontWeight.bold)),
+
+                // 🎛️ Dropdown for changing complaint status (updates Firebase)
                 DropdownButton<String>(
                   value: selectedStatus,
                   items: ["Pending", "In Progress", "Resolved"]

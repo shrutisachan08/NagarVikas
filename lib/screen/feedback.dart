@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// 📝 FeedbackPage
+/// Allows users to rate the app, leave written feedback, and optionally provide suggestions.
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({super.key});
 
@@ -8,8 +10,13 @@ class FeedbackPage extends StatefulWidget {
 }
 
 class _FeedbackPageState extends State<FeedbackPage> {
+  // ⭐ User rating value (0.0 to 5.0)
   double _rating = 0.0;
+
+  // 🖊️ Controller for feedback input
   final TextEditingController _feedbackController = TextEditingController();
+
+  // ✅ Checkbox state for suggestions
   bool _suggestions = false;
 
   @override
@@ -24,15 +31,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
         child: ListView(
           children: [
             _buildTitleText('How do you feel about the app?'),
-            SizedBox(height: 20), // Increased space
+            SizedBox(height: 20), // 📏 Space between title and stars
             _buildRatingBar(),
-            SizedBox(height: 25), // Increased space
+            SizedBox(height: 25), // 📏 Space between rating and next title
             _buildTitleText('Describe your experience:'),
-            SizedBox(height: 15), // Increased space
+            SizedBox(height: 15), // 📏 Space before feedback field
             _buildFeedbackTextField(),
-            SizedBox(height: 25), // Increased space
+            SizedBox(height: 25), // 📏 Space before checkbox
             _buildSuggestionsCheckbox(),
-            SizedBox(height: 30), // Increased space
+            SizedBox(height: 30), // 📏 Space before submit button
             _buildSubmitButton(),
           ],
         ),
@@ -40,6 +47,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  /// 🧾 Returns a styled title text widget
   Widget _buildTitleText(String text) {
     return Text(
       text,
@@ -51,6 +59,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  /// ⭐ Builds a custom star rating bar (1–5)
   Widget _buildRatingBar() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -71,6 +80,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  /// 📝 Multiline text field for user feedback input
   Widget _buildFeedbackTextField() {
     return TextField(
       controller: _feedbackController,
@@ -89,6 +99,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  /// ✅ Checkbox for user to indicate if they have suggestions
   Widget _buildSuggestionsCheckbox() {
     return Row(
       children: [
@@ -113,10 +124,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  /// 📤 Submit button to process the feedback
   Widget _buildSubmitButton() {
     return ElevatedButton(
       onPressed: () {
-        _submitFeedback();
+        _submitFeedback(); // 🧾 Trigger submission logic
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.amber,
@@ -128,12 +140,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  /// 🚀 Handles feedback submission and shows confirmation
   void _submitFeedback() {
     String feedback = _feedbackController.text;
     print('Rating: $_rating');
     print('Feedback: $feedback');
     print('Suggestions: $_suggestions');
 
+    // ✅ Show a thank-you dialog
     showDialog(
       context: context,
       builder: (context) {
