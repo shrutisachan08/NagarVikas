@@ -55,7 +55,13 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // ✅ Run the app
-  runApp(const MyApp());
+  runApp(
+  ChangeNotifierProvider(
+    create: (_) => ThemeProvider(),
+    child: const MyApp(),
+  ),
+);
+  
 }
 
 // ✅ Main Application Widget
@@ -64,14 +70,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'NagarVikas',
       theme: ThemeData(
+        brightness: Brightness.light,
         textTheme: GoogleFonts.nunitoTextTheme(),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        textTheme: GoogleFonts.nunitoTextTheme(ThemeData.dark().textTheme),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: const AuthCheckScreen(),
     );
   }
@@ -211,6 +227,38 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) { 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 253, 253, 253),
+  drawer: Drawer(
+    child: ListView(
+      padding: EdgeInsets.zero,
+      children: <Widget>[
+        const DrawerHeader(
+          decoration: BoxDecoration(
+            color: Colors.deepPurple,
+          ),
+          child: Text(
+            'Settings',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+            ),
+          ),
+        ),
+        Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) => SwitchListTile(
+            title: const Text("Dark Mode"),
+            value: themeProvider.isDarkMode,
+            onChanged: (value) => themeProvider.toggleTheme(),
+            secondary: const Icon(Icons.dark_mode),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.logout),
+          title: const Text("Logout"),
+          onTap: () => handleLogout(context),
+        ),
+      ],
+    ),
+  ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
