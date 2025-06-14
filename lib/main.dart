@@ -1,3 +1,5 @@
+// 📦 Importing necessary packages and screens
+import 'package:NagarVikas/service/ConnectivityService.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
@@ -14,21 +16,27 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+// 🔧 Background message handler for Firebase
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print("Handling a background message: ${message.messageId}");
 }
 
 void main() async {
+  // ✅ Ensures Flutter is initialized before any Firebase code
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ OneSignal push notification setup
   OneSignal.initialize("70614e6d-8bbf-4ac1-8f6d-b261a128059c");
   OneSignal.Notifications.requestPermission(true);
 
+  // ✅ Set up notification opened handler
   OneSignal.Notifications.addClickListener((event) {
     print("Notification Clicked: ${event.notification.body}");
   });
 
-  // ✅ Initialize Firebase
+  // ✅ Firebase initialization for Web and Mobile
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: FirebaseOptions(
@@ -42,12 +50,17 @@ void main() async {
       ),
     );
   } else {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(); // This might fail if no default options
   }
+  // ✅ Register background handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // ✅ Run the app
+  await ConnectivityService().initialize();
   runApp(const MyApp());
 }
 
+// ✅ Main Application Widget
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -61,12 +74,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const AuthCheckScreen(),
+      home: ConnectivityOverlay(child: const AuthCheckScreen()),
     );
   }
 }
 
-// ✅ *Auth Check Screen (Decides User/Admin Navigation)*
+// ✅ Auth Check Screen (Decides User/Admin Navigation)
 class AuthCheckScreen extends StatefulWidget {
   const AuthCheckScreen({super.key});
 
@@ -74,6 +87,7 @@ class AuthCheckScreen extends StatefulWidget {
   _AuthCheckScreenState createState() => _AuthCheckScreenState();
 }
 
+// ✅ State for Auth Check Screen
 class _AuthCheckScreenState extends State<AuthCheckScreen> {
   bool _showSplash = true;
   firebase_auth.User? user;
@@ -84,7 +98,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     super.initState();
     _checkLastLogin();
 
-    // ✅ Listen for authentication state changes
+    // ✅ Listen for authentication state changes like(login/logout changes)
     firebase_auth.FirebaseAuth.instance
         .authStateChanges()
         .listen((firebase_auth.User? newUser) {
@@ -93,7 +107,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
       });
     });
 
-    // ✅ Show splash screen for 5 seconds before navigating
+    // ✅ Splash screen timer
     Timer(const Duration(seconds: 9), () {
       setState(() {
         _showSplash = false;
@@ -101,7 +115,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     });
   }
 
-  // ✅ *Check Last Login (Fix for User Going to Admin Dashboard)*
+  // ✅ Check Last Login (Fix for User Going to Admin Dashboard)
   Future<void> _checkLastLogin() async {
     final prefs = await SharedPreferences.getInstance();
     bool? storedIsAdmin = prefs.getBool('isAdmin');
@@ -113,17 +127,18 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     }
   }
 
+  // ✅ Build Method (Decides Which Screen to Show)
   @override
   Widget build(BuildContext context) {
     if (_showSplash) {
       return const SplashScreen();
     }
 
-    // ✅ *Redirect Based on Last Login*
+    // ✅ Redirect Based on Last Login
     if (user == null) {
       return const WelcomeScreen();
     } else {
-      // ✅ *Admin should only go to AdminDashboard IF they were last logged in as Admin*
+      // ✅ Admin should only go to AdminDashboard IF they were last logged in as Admin
       if (isAdmin && user!.email!.contains("gov")) {
         return AdminDashboard();
       } else {
@@ -133,7 +148,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   }
 }
 
-// ✅ *Admin Login Function (Stores Admin Status)*
+// ✅ Admin Login Function (Stores Admin Status)
 Future<void> handleAdminLogin(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool('isAdmin', true);
@@ -141,20 +156,21 @@ Future<void> handleAdminLogin(BuildContext context) async {
       context, MaterialPageRoute(builder: (context) => AdminDashboard()));
 }
 
-// ✅ *Logout Function (Clears Admin Status & Redirects to Login)*
+// ✅ Logout Function (Clears Admin Status & Redirects to Login)
 Future<void> handleLogout(BuildContext context) async {
+  // Clear stored admin status
   final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('isAdmin'); // ✅ *Fix: Remove admin status on logout*
-  await firebase_auth.FirebaseAuth.instance.signOut();
-  Navigator.pushReplacement(
-      context, MaterialPageRoute(builder: (context) => const LoginPage()));
+  await prefs.remove('isAdmin'); // ✅ Clear admin status 
+  await firebase_auth.FirebaseAuth.instance.signOut(); 
+  Navigator.pushReplacement( // ✅ Redirect to Login Page
+      context, MaterialPageRoute(builder: (context) => const LoginPage())); // ✅ Fix: Use const for LoginPage to avoid unnecessary rebuilds
 }
 
-// ✅ *Splash Screen*
+/// SplashScreen - displays an animated logo on app launch
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
-  @override
+  @override // Build Method for Splash Screen
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 252, 252, 252),
@@ -165,11 +181,11 @@ class SplashScreen extends StatelessWidget {
   }
 }
 
-// ✅ *Welcome Screen*
+// ✅ Welcome Screen shown before registration
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
-  @override
+  @override 
   _WelcomeScreenState createState() => _WelcomeScreenState();
 }
 
@@ -180,7 +196,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     setState(() {
       _isLoading = true;
     });
-
+    // ✅ Simulate a delay for loading effect
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.push(
         context,
@@ -193,8 +209,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  @override 
+  Widget build(BuildContext context) { 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 253, 253, 253),
       body: Padding(
@@ -203,6 +219,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // ✅ Top Circle Animation
             Align(
               alignment: Alignment.topLeft,
               child: ZoomIn(
@@ -218,6 +235,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
             const SizedBox(height: 30),
+
+            // ✅ Main Image Animation
             ZoomIn(
               duration: const Duration(milliseconds: 1200),
               child: Image.asset(
@@ -228,6 +247,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // ✅ Headline & Subtext
             FadeInUp(
               duration: const Duration(milliseconds: 1200),
               child: Column(
@@ -255,7 +276,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
             const SizedBox(height: 50),
-            FadeInUp(
+
+            // ✅ Get Started Button
+            FadeInUp( // Animation for button
               duration: const Duration(milliseconds: 1600),
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _onGetStartedPressed,
@@ -265,8 +288,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       const EdgeInsets.symmetric(horizontal: 90, vertical: 15),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                ),
-                child: _isLoading
+                ), // ✅ Button style
+                child: _isLoading 
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text("Get Started",
                         style: TextStyle(
