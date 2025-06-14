@@ -1,4 +1,5 @@
 // 📦 Importing necessary packages and screens
+import 'package:NagarVikas/service/ConnectivityService.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
@@ -58,13 +59,13 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // ✅ Run the app
-  runApp(
+await ConnectivityService().initialize();
+runApp(
   ChangeNotifierProvider(
     create: (_) => ThemeProvider(),
     child: const MyApp(),
   ),
 );
-  
 }
 
 // ✅ Main Application Widget
@@ -83,7 +84,6 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         textTheme: GoogleFonts.nunitoTextTheme(ThemeData.dark().textTheme),
@@ -91,7 +91,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: const AuthCheckScreen(),
+      home: ConnectivityOverlay(child: const AuthCheckScreen()),
     );
   }
 }
