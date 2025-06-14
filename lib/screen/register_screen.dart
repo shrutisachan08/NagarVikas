@@ -1,3 +1,14 @@
+/// RegisterScreen
+/// A stateful widget that handles new user registration using Firebase Authentication.
+/// Includes:
+/// - Email/password input
+/// - Password validation
+/// - Email verification
+/// - Guest login
+/// - Firebase Realtime Database integration
+
+
+// import necessary Flutter and Firebase packages
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -6,6 +17,7 @@ import 'package:NagarVikas/screen/login_page.dart';
 import 'package:NagarVikas/screen/issue_selection.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+// Register screen widget
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -14,18 +26,22 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  // Firebase authentication and realtime database reference
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref("users");
 
+  // Text field controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  // Flags for loading and password validation
   bool isLoading = false;
   bool hasUppercase = false;
   bool hasSpecialChar = false;
   bool hasMinLength = false;
 
+  // ✅ Real-time password validation logic
   void _validatePassword(String password) {
     setState(() {
       hasUppercase = password.contains(RegExp(r'[A-Z]'));
@@ -34,9 +50,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
+  // ✅ Handles user registration process
   Future<void> _registerUser() async {
     String password = _passwordController.text.trim();
 
+    // Check if password meets criteria
     if (!hasMinLength || !hasUppercase || !hasSpecialChar) {
       Fluttertoast.showToast(msg: "Password does not meet the required criteria.");
       return;
@@ -47,6 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
+      // ✅ Create user using Firebase Authentication
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: password,
@@ -66,11 +85,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await _auth.signOut(); // Sign out the user after registration
       await Future.delayed(Duration(seconds: 2));
 
+      // Navigate to login screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginPage()),
       );
     } on FirebaseAuthException catch (e) {
+      // Handle various Firebase auth errors
       String errorMessage = "An error occurred. Please try again.";
 
       if (e.code == 'email-already-in-use') {
@@ -93,6 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
+  /// Signs in the user anonymously and navigates to the issue selection screen.
   Future<void> _continueAsGuest() async {
     try {
       await _auth.signInAnonymously();
@@ -106,6 +128,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  /// Builds the registration UI with animation, input fields, 
+  /// and buttons for registration and guest login.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,6 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               SizedBox(height: 20),
 
+              // Screen Title with Animation
               FadeInUp(
                 duration: Duration(milliseconds: 800),
                 child: Text(
@@ -128,6 +153,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: 20),
 
+              // Registration Illustration
               ZoomIn(
                 duration: Duration(milliseconds: 800),
                 child: Image.asset("assets/register.png", height: 200),
@@ -135,6 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: 20),
 
+              // Name Input Field
               FadeInUp(
                 duration: Duration(milliseconds: 1000),
                 child: TextField(
@@ -205,11 +232,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 ),
-),
+              ),
 
 
               SizedBox(height: 12),
-             Column(
+
+              // Password Requirements List
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ZoomIn(duration: Duration(milliseconds: 800),
@@ -226,6 +255,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: 37),
 
+              // Register Button
               FadeInUp(
                 duration: Duration(milliseconds: 1800),
                 child: ElevatedButton(
@@ -243,6 +273,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: 15),
 
+              // Continue as Guest Button
               FadeInUp(
                 duration: Duration(milliseconds: 2000),
                 child: OutlinedButton.icon(
@@ -259,6 +290,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: 10),
 
+              // Redirect to Login Page if account exists
               FadeInUp(
                 duration: Duration(milliseconds: 2200),
                 child: TextButton(
@@ -275,6 +307,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  // Widget to build password requirement item
   Widget buildPasswordValidationItem(String text, bool isValid) {
     return Row(
       children: [

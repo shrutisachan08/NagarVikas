@@ -1,3 +1,4 @@
+// Importing necessary Flutter and plugin packages
 import 'package:NagarVikas/screen/about.dart';
 import 'package:NagarVikas/screen/contact.dart';
 import 'package:NagarVikas/screen/facing_issues.dart';
@@ -26,6 +27,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
+// Main Stateful Widget for Issue Selection Page
 class IssueSelectionPage extends StatefulWidget {
   const IssueSelectionPage({super.key});
 
@@ -37,11 +39,16 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
   @override
   void initState() {
     super.initState();
+
+    // Add OneSignal trigger for in-app messages
     OneSignal.InAppMessages.addTrigger("welcoming_you", "available");
+
+  // Save FCM Token to Firebase if user is logged in, and request notification permission if not already granted.
   getTokenAndSave();
     requestNotificationPermission();
   }
 
+  // Requesting Firebase Messaging notification permissions
   void requestNotificationPermission() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
@@ -49,6 +56,7 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
     NotificationSettings settings = await messaging.getNotificationSettings();
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      // Show toast only once
       SharedPreferences prefs = await SharedPreferences.getInstance();
       bool hasShownToast = prefs.getBool('hasShownToast') ?? false;
 
@@ -57,7 +65,7 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
         await prefs.setBool('hasShownToast', true); 
       }
     } else {
-      
+      // Request notification permissions if not already granted
       NotificationSettings newSettings = await messaging.requestPermission();
       if (newSettings.authorizationStatus == AuthorizationStatus.authorized) {
         Fluttertoast.showToast(msg: "Notifications Enabled");
@@ -67,6 +75,7 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
     }
   }
 
+  // Get and save FCM token to Firebase Realtime Database
   Future<void> getTokenAndSave() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -102,6 +111,7 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
     }
   }
 
+  // Building the main issue selection grid with animated cards
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,6 +141,7 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
                 crossAxisSpacing: 20,
                 mainAxisSpacing: 20,
                 children: [
+                  // Each issue card has a ZoomIn animation for better user experience and smooth UI.
                   ZoomIn(
                     delay: Duration(milliseconds: 200),
                     child:  
@@ -175,6 +186,7 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
           ],
         ),
       ),
+      // Floating Action Button to navigate to the Discussion Forum screen.
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color.fromARGB(255, 7, 7, 7),
         onPressed: () {
@@ -188,6 +200,7 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
     );
   }
 
+  /// Builds a reusable issue card with an image and label, which navigates to the corresponding issue page on tap.
   Widget buildIssueCard(
       BuildContext context, String text, String imagePath, Widget page) {
     return GestureDetector(
@@ -235,6 +248,7 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
   }
 }
 
+// Shows a processing dialog before navigating to the issue detail page
 void showProcessingDialog(BuildContext context, Widget nextPage) {
   showDialog(
     context: context,
@@ -263,15 +277,14 @@ void showProcessingDialog(BuildContext context, Widget nextPage) {
     },
   );
 
-
-
+  // After 2 seconds, close the dialog and navigate
   Future.delayed(const Duration(seconds: 2), () {
     Navigator.pop(context); 
     Navigator.push(context, MaterialPageRoute(builder: (context) => nextPage));
   });
 }
 
-
+// App Drawer for navigation and profile settings
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
 
@@ -288,6 +301,7 @@ class _AppDrawerState extends State<AppDrawer> {
    _loadAppVersion();
  }
 
+// Load app version using package_info_plus
 Future<void> _loadAppVersion() async {
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   setState(() {
@@ -303,11 +317,13 @@ Future<void> _loadAppVersion() async {
         Expanded(
           child: ListView(
             children: [
+              // App title
               const DrawerHeader(
           decoration: BoxDecoration(color: Color.fromARGB(255, 4, 204, 240)),
           child: Text("NagarVikas",
               style: TextStyle(fontSize: 24, color: Colors.black)),
         ),
+        // Drawer Items
         buildDrawerItem(context, Icons.person, "Profile", ProfilePage()),
         buildDrawerItem(
             context, Icons.history, "My Complaints", MyComplaintsScreen()),
@@ -321,7 +337,7 @@ Future<void> _loadAppVersion() async {
         buildDrawerItem(
             context, Icons.headset_mic, "Contact Us", ContactUsPage()),
 
-
+        // Logout Option
         ListTile(
           leading: const Icon(Icons.logout),
           title: const Text("Logout"),
@@ -355,6 +371,8 @@ Future<void> _loadAppVersion() async {
       
 
       const Divider(),
+
+       // Social media section
        const Padding(
         padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 15),
         child: Text(
@@ -400,12 +418,7 @@ Divider(), // Divider before the footer
     );
   }    
         
-
-
-
-  
-
-
+  // Reusable method for social media icon buttons
   Widget _socialMediaIcon(IconData icon, String url, Color color) {
     return IconButton(
       icon: FaIcon(
@@ -419,6 +432,7 @@ Divider(), // Divider before the footer
   }
 }
 
+// Reusable widget to build drawer items
 Widget buildDrawerItem(BuildContext context, IconData icon, String title, Widget page) {
   return Material(
     color: Colors.transparent,
