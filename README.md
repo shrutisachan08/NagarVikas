@@ -53,6 +53,13 @@ For help getting started with Flutter development, view the [online documentatio
 
 ---
 
+## Preview
+
+![Screenshot 1]()
+![Screenshot 2]()
+![Screenshot 3]()
+![Screenshot 4]()
+
 ## 🤝 How to Contribute
 
 > We welcome contributors to improve and scale NagarVikas! Here's how you can help:
