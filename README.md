@@ -55,10 +55,22 @@ For help getting started with Flutter development, view the [online documentatio
 
 ## Preview
 
-![Screenshot 1](./screenshot app 1.jpg)
-![Screenshot 2](./screenshot 2.jpg)
-![Screenshot 3](./screenshot app 3.jpg)
-![Screenshot 4](./screenshot app 4.jpg)
+**Screenshot 1**
+
+![Image](https://github.com/user-attachments/assets/62c4cf33-effa-42cc-a4cd-78bb7e31fca4)
+
+**Screenshot 2**
+
+![Image](https://github.com/user-attachments/assets/3756888e-6498-455a-a49c-bb5a22fd0312)
+
+**Screenshot 3**
+
+![Image](https://github.com/user-attachments/assets/fa6ceeca-cf9b-41bf-874d-c1b7723cad83)
+
+**Screenshot 4**
+
+![Image](https://github.com/user-attachments/assets/c8fc0008-121c-4c60-98be-fe44d635c2d1)
+
 
 ## 🤝 How to Contribute
 
