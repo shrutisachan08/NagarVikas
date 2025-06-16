@@ -2,17 +2,18 @@
 
 *NagarVikas* is a smart complaint management app built with Flutter and Firebase. It allows citizens to raise civic issues in their locality while enabling government authorities to track, manage, and resolve them efficiently.
 
-## Table of Contents
+## 📋 Table of Contents
 
 - [Getting Started](#getting-started)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
+- [Preview](#preview)
 - [How to Contribute](#-how-to-contribute)
 - [Good First Issues](#-good-first-issues)
 - [Project Admin](#-project-admin)
 - [License](#-license)
 
-## Getting Started
+## 💻 Getting Started
 
 This project is a starting point for a Flutter application.
 
@@ -53,7 +54,7 @@ For help getting started with Flutter development, view the [online documentatio
 
 ---
 
-## Preview
+## 📸 Preview
 
 **Screenshot 1**
 
@@ -94,7 +95,7 @@ For help getting started with Flutter development, view the [online documentatio
 
 ---
 
-## 🧑‍💻 Project Admin
+## 🧑 Project Admin
 
 *Prateek Chourasia*  
 📧 prateekchourasia9876@gmail.com  
@@ -105,3 +106,5 @@ For help getting started with Flutter development, view the [online documentatio
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+---
