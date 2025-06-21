@@ -9,7 +9,7 @@ class NewEntryPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("New Issue"),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 5, 139, 207),
         foregroundColor: Colors.black,
         elevation: 1,
       ),

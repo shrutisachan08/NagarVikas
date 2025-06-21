@@ -9,7 +9,7 @@ class DrainagePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Drainage Issue"),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 1, 163, 213),
         foregroundColor: Colors.black,
         elevation: 1,
       ),

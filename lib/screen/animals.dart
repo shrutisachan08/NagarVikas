@@ -9,7 +9,7 @@ class AnimalsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Stray Animals Issue"),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 2, 138, 192),
         foregroundColor: Colors.black,
         elevation: 1,
       ),
