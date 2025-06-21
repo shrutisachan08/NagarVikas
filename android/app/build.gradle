@@ -8,7 +8,8 @@ plugins {
 
 android {
     namespace = "com.example.nagarsur"
-    compileSdk = 34
+    // Required for video_player plugin which needs SDK 35+ (Comment by VJLIVE)
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -26,7 +27,8 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdkVersion = 23
-        targetSdk = flutter.targetSdkVersion
+        // Required for video_player plugin which needs SDK 35+ (Comment by VJLIVE)
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

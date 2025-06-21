@@ -65,6 +65,7 @@ dependencies:
   connectivity_plus: ^6.1.4
   provider: ^6.1.5
   share_plus: ^11.0.0
+  video_player: ^2.10.0
        
  
 dev_dependencies:
