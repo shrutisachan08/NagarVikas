@@ -273,7 +273,7 @@ class _SharedIssueFormState extends State<SharedIssueForm> {
   InputDecoration _inputDecoration(String hint) => InputDecoration(
     hintText: hint,
     filled: true,
-    fillColor: Colors.grey[200],
+    fillColor: const Color.fromARGB(255, 251, 250, 250),
     contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
   );
@@ -465,7 +465,7 @@ class _SharedIssueFormState extends State<SharedIssueForm> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: const Color.fromARGB(255, 253, 253, 253),
           borderRadius: BorderRadius.circular(8),
           border: filled ? null : Border.all(color: Colors.grey),
         ),
