@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
 class LogoWidget extends StatefulWidget {
+  const LogoWidget({super.key});
+
   @override
   _LogoWidgetState createState() => _LogoWidgetState();
 }
