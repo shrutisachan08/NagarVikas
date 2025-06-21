@@ -9,7 +9,7 @@ class RoadPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Road Issue"),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 3, 129, 192),
         foregroundColor: Colors.black,
         elevation: 1,
       ),
