@@ -313,7 +313,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   const SizedBox(
                       height: 10), // Space between heading and subtext
                   const Text(
-                    "Register your complaint now and\nget it done in few time.",
+                    "Register your complaint now and\nget it done in few time..",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,
