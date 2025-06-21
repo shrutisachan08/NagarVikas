@@ -14,6 +14,7 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
   TextEditingController searchController = TextEditingController(); // Added
 
   bool _isLoading = true;
+  String selectedStatus = 'All'; // <-- Add this for status filter
 
   @override
   void initState() {
@@ -71,17 +72,26 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
 
       setState(() {
         complaints = loadedComplaints;
-        filteredComplaints = loadedComplaints; // Sync with search list
+        _applyFilters(); // Use new filter logic
         _isLoading = false;
       });
     });
   }
 
   void _searchComplaints(String query) {
+    _applyFilters();
+  }
+
+  void _applyFilters() {
+    String query = searchController.text;
     setState(() {
       filteredComplaints = complaints.where((complaint) {
-        return complaint.values.any((value) =>
-            value.toString().toLowerCase().contains(query.toLowerCase()));
+        final matchesStatus = selectedStatus == 'All' ||
+            complaint['status'].toString().toLowerCase() == selectedStatus.toLowerCase();
+        final matchesQuery = query.isEmpty ||
+            complaint.values.any((value) =>
+                value.toString().toLowerCase().contains(query.toLowerCase()));
+        return matchesStatus && matchesQuery;
       }).toList();
     });
   }
@@ -150,18 +160,46 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(12),
-                      child: TextField(
-                        controller: searchController,
-                        onChanged: _searchComplaints,
-                        decoration: InputDecoration(
-                          hintText: 'Search complaints...',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: searchController,
+                              onChanged: (val) => _applyFilters(),
+                              decoration: InputDecoration(
+                                hintText: 'Search complaints...',
+                                prefixIcon: Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                            ),
                           ),
-                          filled: true,
-                          fillColor: Colors.white,
-                        ),
+                          SizedBox(width: 10),
+                          DropdownButton<String>(
+                            value: selectedStatus,
+                            items: [
+                              'All',
+                              'Pending',
+                              'In Progress',
+                              'Resolved',
+                            ].map((status) => DropdownMenuItem(
+                                  value: status,
+                                  child: Text(status),
+                                ))
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  selectedStatus = value;
+                                });
+                                _applyFilters();
+                              }
+                            },
+                          ),
+                        ],
                       ),
                     ),
                     Expanded(
