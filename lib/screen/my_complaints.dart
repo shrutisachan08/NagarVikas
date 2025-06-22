@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+import 'dart:developer' as developer;
 
 class MyComplaintsScreen extends StatefulWidget {
+  const MyComplaintsScreen({super.key}); // ✅ Fixed: Added named key parameter
+
   @override
-  _MyComplaintsScreenState createState() => _MyComplaintsScreenState();
+  MyComplaintsScreenState createState() => MyComplaintsScreenState(); // ✅ Fixed: Made state class public
 }
 
-class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
+class MyComplaintsScreenState extends State<MyComplaintsScreen> { // ✅ Fixed: Made class public
   List<Map<String, dynamic>> complaints = [];
   bool _isLoading = true;
 
@@ -28,10 +31,12 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
       final data = event.snapshot.value as Map<dynamic, dynamic>?;
 
       if (data == null) {
-        setState(() {
-          complaints = [];
-          _isLoading = false;
-        });
+        if (mounted) { // ✅ Added mounted check
+          setState(() {
+            complaints = [];
+            _isLoading = false;
+          });
+        }
         return;
       }
 
@@ -51,7 +56,7 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
             formattedTime = DateFormat('hh:mm a').format(dateTime);
           }
         } catch (e) {
-          print("Error parsing timestamp: $e");
+          developer.log("Error parsing timestamp: $e"); // ✅ Fixed: Replaced print with developer.log
         }
 
         loadedComplaints.add({
@@ -65,10 +70,12 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
         });
       });
 
-      setState(() {
-        complaints = loadedComplaints;
-        _isLoading = false;
-      });
+      if (mounted) { // ✅ Added mounted check
+        setState(() {
+          complaints = loadedComplaints;
+          _isLoading = false;
+        });
+      }
     });
   }
 
@@ -109,19 +116,19 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 253, 254, 254),
       appBar: AppBar(
-        title: Text("My Complaints"),
+        title: const Text("My Complaints"),
         backgroundColor: const Color.fromARGB(255, 4, 204, 240),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : complaints.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset('assets/no_complaints.png', height: 150),
-                      SizedBox(height: 20),
-                      Text(
+                      const SizedBox(height: 20),
+                      const Text(
                         "No Complaints Raised Yet",
                         style: TextStyle(
                           fontSize: 18,
@@ -134,23 +141,23 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                 )
               : ListView.builder(
                   itemCount: complaints.length,
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   itemBuilder: (ctx, index) {
                     return Container(
-                      margin: EdgeInsets.only(bottom: 12),
+                      margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
+                            color: Colors.grey.withValues(alpha: 0.2), // ✅ Fixed: Replaced withOpacity with withValues
                             spreadRadius: 2,
                             blurRadius: 5,
                           ),
                         ],
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(15),
+                        padding: const EdgeInsets.all(15),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -158,13 +165,13 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                             Align(
                               alignment: Alignment.topRight,
                               child: Container(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: _getStatusColor(
                                       complaints[index]['status']),
                                   borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
+                                  boxShadow: const [
                                     BoxShadow(
                                       color: Colors.black12,
                                       spreadRadius: 1,
@@ -174,14 +181,14 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                 ),
                                 child: Text(
                                   complaints[index]['status'],
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
 
                             // Title Row with Icon
                             Row(
@@ -191,11 +198,11 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                   color: Colors.blueAccent,
                                   size: 22,
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     complaints[index]['issue'],
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black87,
@@ -205,7 +212,7 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                               ],
                             ),
 
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Divider(color: Colors.grey[300]),
 
                             // Date & Time Row
@@ -213,33 +220,33 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                               children: [
                                 Icon(Icons.calendar_today,
                                     size: 16, color: Colors.grey[600]),
-                                SizedBox(width: 5),
+                                const SizedBox(width: 5),
                                 Text(
                                   complaints[index]['date'],
-                                  style: TextStyle(color: Colors.black54),
+                                  style: const TextStyle(color: Colors.black54),
                                 ),
-                                SizedBox(width: 15),
+                                const SizedBox(width: 15),
                                 Icon(Icons.access_time,
                                     size: 16, color: Colors.grey[600]),
-                                SizedBox(width: 5),
+                                const SizedBox(width: 5),
                                 Text(
                                   complaints[index]['time'],
-                                  style: TextStyle(color: Colors.black54),
+                                  style: const TextStyle(color: Colors.black54),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
 
                             // Location Row
                             Row(
                               children: [
-                                Icon(Icons.location_on,
+                                const Icon(Icons.location_on,
                                     size: 18, color: Colors.redAccent),
-                                SizedBox(width: 5),
+                                const SizedBox(width: 5),
                                 Expanded(
                                   child: Text(
                                     "${complaints[index]['location']}, ${complaints[index]['city']}, ${complaints[index]['state']}",
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.black87,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -253,7 +260,7 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                       ),
                     );
                   },
-               ),
-);
-}
+                ),
+    );
+  }
 }

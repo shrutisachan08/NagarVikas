@@ -16,10 +16,10 @@ class RoadPage extends StatefulWidget {
   const RoadPage({super.key});
 
   @override
-  _RoadPageState createState() => _RoadPageState();
+  RoadPageState createState() => RoadPageState();
 }
 
-class _RoadPageState extends State<RoadPage> {
+class RoadPageState extends State<RoadPage> {
   String? _selectedState;
   String? _selectedCity;
   final TextEditingController _locationController = TextEditingController();
@@ -160,8 +160,15 @@ class _RoadPageState extends State<RoadPage> {
           msg: "Location permissions are permanently denied.");
       return;
     }
+
+    // Using the new LocationSettings instead of deprecated desiredAccuracy
+    LocationSettings locationSettings = const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 100,
+    );
+
     Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      locationSettings: locationSettings,
     );
 
     try {
@@ -172,15 +179,19 @@ class _RoadPageState extends State<RoadPage> {
       String address =
           "${place.subLocality}, ${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}, ${place.isoCountryCode}";
 
-      setState(() {
-        _locationController.text = address;
-      });
+      if (mounted) {
+        setState(() {
+          _locationController.text = address;
+        });
+      }
     } catch (e) {
       Fluttertoast.showToast(msg: "Failed to get address.");
-      setState(() {
-        _locationController.text =
-            "${position.latitude}, ${position.longitude}";
-      });
+      if (mounted) {
+        setState(() {
+          _locationController.text =
+              "${position.latitude}, ${position.longitude}";
+        });
+      }
     }
   }
 
@@ -211,6 +222,8 @@ class _RoadPageState extends State<RoadPage> {
       return;
     }
 
+    if (!mounted) return;
+
     setState(() {
       _isUploading = true;
     });
@@ -236,14 +249,20 @@ class _RoadPageState extends State<RoadPage> {
       });
 
       Fluttertoast.showToast(msg: "Complaint submitted successfully!");
+      
+      // Check if widget is still mounted before navigation
+      if (!mounted) return;
+      
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => DoneScreen()));
+          context, MaterialPageRoute(builder: (context) => const DoneScreen()));
     } catch (e) {
       Fluttertoast.showToast(msg: "Error submitting complaint.");
     } finally {
-      setState(() {
-        _isUploading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
     }
   }
 
@@ -255,7 +274,7 @@ class _RoadPageState extends State<RoadPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: FadeInDown(
-          duration: Duration(milliseconds: 1000),
+          duration: const Duration(milliseconds: 1000),
           child: const Text(
             "Road damage issue selected",
             style: TextStyle(
@@ -265,11 +284,11 @@ class _RoadPageState extends State<RoadPage> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               "Please give accurate and correct information for a faster solution.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
@@ -279,12 +298,12 @@ class _RoadPageState extends State<RoadPage> {
               child:
                   Image.asset("assets/selected.png", height: 210, width: 210),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             // State Dropdown
             DropdownButtonFormField<String>(
               value: _selectedState,
-              hint: Text("Select State"),
+              hint: const Text("Select State"),
               items: _states.keys.map((state) {
                 return DropdownMenuItem(value: state, child: Text(state));
               }).toList(),
@@ -296,12 +315,12 @@ class _RoadPageState extends State<RoadPage> {
               },
               decoration: _inputDecoration(),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             // City Dropdown
             DropdownButtonFormField<String>(
               value: _selectedCity,
-              hint: Text("Select City"),
+              hint: const Text("Select City"),
               items: _selectedState != null
                   ? _states[_selectedState]!.map((city) {
                       return DropdownMenuItem(value: city, child: Text(city));
@@ -314,20 +333,20 @@ class _RoadPageState extends State<RoadPage> {
               },
               decoration: _inputDecoration(),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             TextField(
               controller: _locationController,
               decoration: _inputDecoration().copyWith(
                 hintText: "Enter location manually or click icon",
                 suffixIcon: IconButton(
-                  icon: Icon(Icons.my_location, color: const Color.fromARGB(255, 6, 6, 6)),
+                  icon: const Icon(Icons.my_location, color: Color.fromARGB(255, 6, 6, 6)),
                   onPressed: _getCurrentLocation,
                 ),
               ),
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             TextField(
               controller: _descriptionController,
@@ -342,12 +361,12 @@ class _RoadPageState extends State<RoadPage> {
               ),
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             GestureDetector(
               onTap: _pickImage,
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 15),
+                padding: const EdgeInsets.symmetric(vertical: 15),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
@@ -358,11 +377,11 @@ class _RoadPageState extends State<RoadPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.image, color: Colors.black54),
-                    SizedBox(width: 10),
+                    const Icon(Icons.image, color: Colors.black54),
+                    const SizedBox(width: 10),
                     Text(
                       _selectedImage == null ? "Upload Image" : "Change Image",
-                      style: TextStyle(color: Colors.black54),
+                      style: const TextStyle(color: Colors.black54),
                     ),
                   ],
                 ),
@@ -372,11 +391,11 @@ class _RoadPageState extends State<RoadPage> {
             // Show Selected Image Preview
             if (_selectedImage != null)
               Padding(
-                padding: EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.only(top: 10),
                 child: Image.file(_selectedImage!, height: 100),
               ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             // Submit Button
             FadeInUp(
               duration: const Duration(milliseconds: 1400),
@@ -384,7 +403,7 @@ class _RoadPageState extends State<RoadPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       _isUploading ? Colors.grey : (_selectedImage == null ? Colors.grey : Colors.black),
-                  padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
@@ -392,8 +411,8 @@ class _RoadPageState extends State<RoadPage> {
                   _submitForm();
                 },
                 child: _isUploading
-                    ? CircularProgressIndicator(color: Colors.white)
-                      : Text("Submit", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("Submit", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ],
@@ -407,7 +426,7 @@ class _RoadPageState extends State<RoadPage> {
     return InputDecoration(
       filled: true,
       fillColor: Colors.grey[200],
-      contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
       border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
     );

@@ -3,9 +3,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class ContactUsPage extends StatelessWidget {
   final String phoneNumber = "+917307858026";  // Replace with your phone number
-  final String email = "support@nagarvikas.com";
+  final String email = "support@nagarvikas.com";  // Replace with your support email
 
-  const ContactUsPage({super.key});  // Replace with your support email
+  const ContactUsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +27,13 @@ class ContactUsPage extends StatelessWidget {
             _buildContactTile(
               icon: Icons.phone,
               text: phoneNumber,
-              onTap: () => _launchPhoneDialer(),
+              onTap: _launchPhoneDialer,
             ),
             SizedBox(height: 20),
             _buildContactTile(
               icon: Icons.email,
               text: email,
-              onTap: () => _launchEmailClient(),
+              onTap: _launchEmailClient,
             ),
           ],
         ),
@@ -41,9 +41,13 @@ class ContactUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildContactTile({required IconData icon, required String text, required Function onTap}) {
+  Widget _buildContactTile({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
-      onTap: () => onTap(),
+      onTap: onTap,
       child: Card(
         color: Colors.amberAccent,
         shape: RoundedRectangleBorder(
@@ -66,22 +70,26 @@ class ContactUsPage extends StatelessWidget {
   }
 
   // Function to launch the phone dialer
-  _launchPhoneDialer() async {
-    final phoneUrl = 'tel:$phoneNumber'; // tel: URL scheme for phone calls
-    if (await canLaunch(phoneUrl)) {
-      await launch(phoneUrl);  // Launch the phone dialer
+  void _launchPhoneDialer() async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
     } else {
-      throw 'Could not launch $phoneUrl';  // Handle error if dialing fails
+      throw 'Could not launch $phoneUri';
     }
   }
 
   // Function to launch the email client
-  _launchEmailClient() async {
-    final emailUrl = 'mailto:$email'; // mailto: URL scheme for email
-    if (await canLaunch(emailUrl)) {
-      await launch(emailUrl);  // Launch the email client
+  void _launchEmailClient() async {
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      query: 'subject=Support Needed&body=Hello NagarVikas Support Team,',
+    );
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
     } else {
-      throw 'Could not launch $emailUrl';  // Handle error if email client fails
-}
-}
+      throw 'Could not launch $emailUri';
+    }
+  }
 }

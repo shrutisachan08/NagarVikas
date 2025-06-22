@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-
 import 'login_page.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
   @override
-  _AdminDashboardState createState() => _AdminDashboardState();
+  AdminDashboardState createState() => AdminDashboardState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard> {
+class AdminDashboardState extends State<AdminDashboard> {
   int totalComplaints = 0;
   int pendingComplaints = 0;
   int inProgressComplaints = 0;
@@ -34,6 +33,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       final complaintData = complaintEvent.snapshot.value as Map<dynamic, dynamic>?;
 
       if (complaintData == null) {
+        if (!mounted) return;
         setState(() {
           totalComplaints = pendingComplaints = inProgressComplaints = resolvedComplaints = 0;
           complaints = [];
@@ -85,6 +85,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         });
       }
 
+      if (!mounted) return;
       setState(() {
         totalComplaints = total;
         pendingComplaints = pending;
@@ -119,9 +120,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
           TextButton(
             onPressed: () async {
+              // Store the navigator context before async operation
+              final navigator = Navigator.of(context);
+              
               await FirebaseAuth.instance.signOut();
-              Navigator.pushAndRemoveUntil(
-                context, MaterialPageRoute(builder: (context) => LoginPage()), (route) => false);
+              
+              // Check if widget is still mounted before using navigator
+              if (mounted) {
+                navigator.pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => LoginPage()), 
+                  (route) => false
+                );
+              }
             },
             child: const Text("Yes"),
           ),
@@ -132,65 +142,49 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return false;
-      },
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Admin Dashboard"),
-      backgroundColor: const Color.fromARGB(255, 4, 204, 240),
-        
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(icon: const Icon(Icons.logout), onPressed: () => _logout(context)),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: "Search complaints...",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                filled: true,
-                fillColor: Colors.white,
+          backgroundColor: const Color.fromARGB(255, 4, 204, 240),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(icon: const Icon(Icons.logout), onPressed: () => _logout(context)),
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: "Search complaints...",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                onChanged: _searchComplaints,
               ),
-              onChanged: _searchComplaints,
-            ),
-            const SizedBox(height: 20),
-           Expanded( // complaint list or no complaints UI
-                    child: filteredComplaints.isEmpty
+              const SizedBox(height: 20),
+              Expanded(
+                child: filteredComplaints.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.inbox_outlined,
-                              size: 80,
-                              color: Colors.grey[400],
-                            ),
+                            Icon(Icons.inbox_outlined, size: 80, color: Colors.grey[400]),
                             const SizedBox(height: 16),
-                            Text(
-                              "No Complaints Found",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[600],
-                              ),
-                            ),
+                            Text("No Complaints Found",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.grey[600])),
                             const SizedBox(height: 8),
                             Text(
                               searchController.text.isNotEmpty
                                   ? "Try adjusting your search criteria"
                                   : "There are no complaints to display",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
+                              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                             ),
                           ],
                         ),
@@ -228,57 +222,60 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ),
     );
   }
-  void _showComplaintDetails(BuildContext context, Map<String, dynamic> complaint) {
-  String selectedStatus = complaint["status"];
 
-  showDialog(
-    context: context,
-    builder: (context) => StatefulBuilder(
-      builder: (context, setState) {
-        return AlertDialog(
-          title: Text(complaint["issue_type"], style: TextStyle(fontWeight: FontWeight.bold)),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                complaint["image_url"].isNotEmpty
-                    ? Image.network(complaint["image_url"], height: 200, fit: BoxFit.cover)
-                    : Icon(Icons.image_not_supported, size: 100),
-                const SizedBox(height: 10),
-                Text("📍 Location:", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text("${complaint["location"]}, ${complaint["city"]}, ${complaint["state"]}"),
-                const SizedBox(height: 10),
-                Text("📅 Date & Time:", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text("${complaint["date"]} at ${complaint["time"]}"),
-                const SizedBox(height: 10),
-                Text("👤 User:", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text("${complaint["user_name"]} (${complaint["user_email"]})"),
-                const SizedBox(height: 10),
-                Text("📝 Description:", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(complaint["description"], style: TextStyle(color: Colors.grey[700])),
-                const SizedBox(height: 10),
-                Text("🔄 Status:", style: TextStyle(fontWeight: FontWeight.bold)),
-                DropdownButton<String>(
-                  value: selectedStatus,
-                  items: ["Pending", "In Progress", "Resolved"]
-                      .map((status) => DropdownMenuItem(value: status, child: Text(status)))
-                      .toList(),
-                  onChanged: (newStatus) {
-                    if (newStatus != null) {
-                      _updateComplaintStatus(complaint["id"], newStatus);
-                      setState(() {
-                        selectedStatus = newStatus;
-                      });
-                    }
-                  },
-                ),
-              ],
+  void _showComplaintDetails(BuildContext context, Map<String, dynamic> complaint) {
+    String selectedStatus = complaint["status"];
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(complaint["issue_type"], style: TextStyle(fontWeight: FontWeight.bold)),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  complaint["image_url"].isNotEmpty
+                      ? Image.network(complaint["image_url"], height: 200, fit: BoxFit.cover)
+                      : Icon(Icons.image_not_supported, size: 100),
+                  const SizedBox(height: 10),
+                  Text("📍 Location:", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${complaint["location"]}, ${complaint["city"]}, ${complaint["state"]}"),
+                  const SizedBox(height: 10),
+                  Text("📅 Date & Time:", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${complaint["date"]} at ${complaint["time"]}"),
+                  const SizedBox(height: 10),
+                  Text("👤 User:", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("${complaint["user_name"]} (${complaint["user_email"]})"),
+                  const SizedBox(height: 10),
+                  Text("📝 Description:", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(complaint["description"], style: TextStyle(color: Colors.grey[700])),
+                  const SizedBox(height: 10),
+                  Text("🔄 Status:", style: TextStyle(fontWeight: FontWeight.bold)),
+                  DropdownButton<String>(
+                    value: selectedStatus,
+                    items: ["Pending", "In Progress", "Resolved"]
+                        .map((status) => DropdownMenuItem(value: status, child: Text(status)))
+                        .toList(),
+                    onChanged: (newStatus) {
+                      if (newStatus != null) {
+                        _updateComplaintStatus(complaint["id"], newStatus);
+                        setState(() {
+                          selectedStatus = newStatus;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-          actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("Close"))],
-        );
-      },
-),
-);
-}
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Close")),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }

@@ -16,7 +16,7 @@ class StreetLightPage extends StatefulWidget {
   const StreetLightPage({super.key});
 
   @override
-  _StreetLightPageState createState() => _StreetLightPageState();
+  State<StreetLightPage> createState() => _StreetLightPageState();
 }
 
 class _StreetLightPageState extends State<StreetLightPage> {
@@ -26,7 +26,7 @@ class _StreetLightPageState extends State<StreetLightPage> {
   final TextEditingController _descriptionController = TextEditingController();
   File? _selectedImage;
   bool _isUploading = false;
-  stt.SpeechToText _speech = stt.SpeechToText();
+  late stt.SpeechToText _speech;
   bool _isListening = false;
 
   final Map<String, List<String>> _states = {
@@ -160,8 +160,13 @@ class _StreetLightPageState extends State<StreetLightPage> {
           msg: "Location permissions are permanently denied.");
       return;
     }
+    
+    // Fixed: Use LocationSettings instead of deprecated desiredAccuracy
     Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 100,
+      ),
     );
 
     try {
@@ -204,7 +209,7 @@ class _StreetLightPageState extends State<StreetLightPage> {
     }
   }
 
-  // Submit Form & Upload Data to Firebase
+  // Fixed: Submit Form with proper context handling
   Future<void> _submitForm() async {
     if (_selectedImage == null) {
       Fluttertoast.showToast(msg: "Please upload an image.");
@@ -236,14 +241,21 @@ class _StreetLightPageState extends State<StreetLightPage> {
       });
 
       Fluttertoast.showToast(msg: "Complaint submitted successfully!");
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => DoneScreen()));
+      
+      // Fixed: Check if widget is still mounted before using context
+      if (mounted) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => const DoneScreen()));
+      }
     } catch (e) {
       Fluttertoast.showToast(msg: "Error submitting complaint.");
     } finally {
-      setState(() {
-        _isUploading = false;
-      });
+      // Fixed: Check if widget is still mounted before calling setState
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
     }
   }
 
@@ -255,7 +267,7 @@ class _StreetLightPageState extends State<StreetLightPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: FadeInDown(
-          duration: Duration(milliseconds: 1000),
+          duration: const Duration(milliseconds: 1000),
           child: const Text(
             "Street Lights issue selected",
             style: TextStyle(
@@ -265,11 +277,11 @@ class _StreetLightPageState extends State<StreetLightPage> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               "Please give accurate and correct information for a faster solution.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
@@ -279,12 +291,12 @@ class _StreetLightPageState extends State<StreetLightPage> {
               child:
                   Image.asset("assets/selected.png", height: 210, width: 210),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             // State Dropdown
             DropdownButtonFormField<String>(
               value: _selectedState,
-              hint: Text("Select State"),
+              hint: const Text("Select State"),
               items: _states.keys.map((state) {
                 return DropdownMenuItem(value: state, child: Text(state));
               }).toList(),
@@ -296,12 +308,12 @@ class _StreetLightPageState extends State<StreetLightPage> {
               },
               decoration: _inputDecoration(),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             // City Dropdown
             DropdownButtonFormField<String>(
               value: _selectedCity,
-              hint: Text("Select City"),
+              hint: const Text("Select City"),
               items: _selectedState != null
                   ? _states[_selectedState]!.map((city) {
                       return DropdownMenuItem(value: city, child: Text(city));
@@ -314,20 +326,20 @@ class _StreetLightPageState extends State<StreetLightPage> {
               },
               decoration: _inputDecoration(),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             TextField(
               controller: _locationController,
               decoration: _inputDecoration().copyWith(
                 hintText: "Enter location manually or click icon",
                 suffixIcon: IconButton(
-                  icon: Icon(Icons.my_location, color: const Color.fromARGB(255, 4, 4, 4)),
+                  icon: const Icon(Icons.my_location, color: Color.fromARGB(255, 4, 4, 4)),
                   onPressed: _getCurrentLocation,
                 ),
               ),
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             TextField(
               controller: _descriptionController,
@@ -342,12 +354,12 @@ class _StreetLightPageState extends State<StreetLightPage> {
               ),
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             GestureDetector(
               onTap: _pickImage,
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 15),
+                padding: const EdgeInsets.symmetric(vertical: 15),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
@@ -358,11 +370,11 @@ class _StreetLightPageState extends State<StreetLightPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.image, color: Colors.black54),
-                    SizedBox(width: 10),
+                    const Icon(Icons.image, color: Colors.black54),
+                    const SizedBox(width: 10),
                     Text(
                       _selectedImage == null ? "Upload Image" : "Change Image",
-                      style: TextStyle(color: Colors.black54),
+                      style: const TextStyle(color: Colors.black54),
                     ),
                   ],
                 ),
@@ -372,11 +384,11 @@ class _StreetLightPageState extends State<StreetLightPage> {
             // Show Selected Image Preview
             if (_selectedImage != null)
               Padding(
-                padding: EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.only(top: 10),
                 child: Image.file(_selectedImage!, height: 100),
               ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             // Submit Button
             FadeInUp(
               duration: const Duration(milliseconds: 1400),
@@ -384,16 +396,16 @@ class _StreetLightPageState extends State<StreetLightPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       _isUploading ? Colors.grey : (_selectedImage == null ? Colors.grey : Colors.black),
-                  padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: _selectedImage == null || _isUploading ? null : () async {
-                  _submitForm();
+                  await _submitForm();
                 },
                 child: _isUploading
-                    ? CircularProgressIndicator(color: Colors.white)
-                      : Text("Submit", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Submit", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ],
@@ -407,7 +419,7 @@ class _StreetLightPageState extends State<StreetLightPage> {
     return InputDecoration(
       filled: true,
       fillColor: Colors.grey[200],
-      contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
       border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
     );

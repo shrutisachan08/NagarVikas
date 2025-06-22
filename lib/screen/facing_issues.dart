@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class FacingIssuesPage extends StatelessWidget {
+class FacingIssuesPage extends StatefulWidget {
   const FacingIssuesPage({super.key});
 
+  @override
+  State<FacingIssuesPage> createState() => _FacingIssuesPageState();
+}
+
+class _FacingIssuesPageState extends State<FacingIssuesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Facing Issues?'),
+        title: const Text('Facing Issues?'),
         backgroundColor: const Color.fromARGB(255, 4, 204, 240),
       ),
       body: Padding(
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: ListView(
           children: [
             _buildSectionTitle('Common Issues'),
@@ -27,7 +33,7 @@ class FacingIssuesPage extends StatelessWidget {
               'Error in submitting complaint',
               'If the complaint submission fails, please check your internet connection and ensure all required fields are filled. Try restarting the app and submitting again.',
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildSectionTitle('Troubleshooting Steps'),
             _buildStepTile(
               'Step 1: Restart the app',
@@ -41,7 +47,7 @@ class FacingIssuesPage extends StatelessWidget {
               'Step 3: Clear app cache',
               'Sometimes clearing the app’s cache can solve performance issues. Go to your phone’s settings, find the app, and clear the cache.',
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildSectionTitle('Need Help?'),
             _buildContactTile(),
           ],
@@ -53,7 +59,7 @@ class FacingIssuesPage extends StatelessWidget {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
         color: Colors.black87,
@@ -63,46 +69,42 @@ class FacingIssuesPage extends StatelessWidget {
 
   Widget _buildIssueTile(String issue, String solution) {
     return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      padding: EdgeInsets.symmetric(vertical: 10.0),
-      margin: EdgeInsets.only(bottom: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      margin: const EdgeInsets.only(bottom: 10.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withAlpha(51),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: ExpansionTile(
         title: Text(
           issue,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
         ),
-        trailing: AnimatedRotation(
-          turns: 1.5, // Rotation on click
-          duration: Duration(milliseconds: 300),
-          child: Icon(
-            Icons.arrow_drop_down,
-            color: Colors.black87,
-            size: 30,
-          ),
+        trailing: const Icon(
+          Icons.arrow_drop_down,
+          color: Colors.black87,
+          size: 30,
         ),
         children: [
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: Text(
               solution,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 color: Colors.black54,
               ),
@@ -116,26 +118,26 @@ class FacingIssuesPage extends StatelessWidget {
 
   Widget _buildStepTile(String step, String description) {
     return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      padding: EdgeInsets.symmetric(vertical: 10.0),
-      margin: EdgeInsets.only(bottom: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      margin: const EdgeInsets.only(bottom: 10.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withAlpha(51),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: ListTile(
         title: Text(
           step,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -143,13 +145,13 @@ class FacingIssuesPage extends StatelessWidget {
         ),
         subtitle: Text(
           description,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             color: Colors.black54,
           ),
           textAlign: TextAlign.justify,
         ),
-        leading: Icon(
+        leading: const Icon(
           Icons.check_circle,
           color: Colors.green,
         ),
@@ -164,8 +166,8 @@ class FacingIssuesPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: ListTile(
-        contentPadding: EdgeInsets.all(15.0),
-        title: Text(
+        contentPadding: const EdgeInsets.all(15.0),
+        title: const Text(
           'Contact Support',
           style: TextStyle(
             fontSize: 20,
@@ -173,21 +175,36 @@ class FacingIssuesPage extends StatelessWidget {
             color: Colors.black,
           ),
         ),
-        subtitle: Text(
+        subtitle: const Text(
           'If the issue persists, please contact our support team for further assistance.',
           style: TextStyle(
             fontSize: 16,
             color: Colors.black87,
           ),
         ),
-        trailing: Icon(
+        trailing: const Icon(
           Icons.arrow_forward,
           color: Colors.black,
         ),
-        onTap: () {
-          // Open contact support page (or email)
+        onTap: () async {
+          final Uri emailUri = Uri(
+            scheme: 'mailto',
+            path: 'support@nagarvikas.com',
+            query: Uri.encodeFull(
+                'subject=App Support Request&body=Describe your issue here...'),
+          );
+
+          if (await canLaunchUrl(emailUri)) {
+            await launchUrl(emailUri);
+          } else if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not launch email client'),
+              ),
+            );
+          }
         },
-     ),
-);
-}
+      ),
+    );
+  }
 }

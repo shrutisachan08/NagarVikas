@@ -13,11 +13,11 @@ class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
 // 🧠 Login page logic and UI state
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // 📝 Controllers for email and password input fields
@@ -56,48 +56,63 @@ class _LoginPageState extends State<LoginPage> {
         Fluttertoast.showToast(
             msg: "Please verify your email before logging in.");
         await _auth.signOut();
-        setState(() => isLoading = false);
+        if (mounted) {
+          setState(() => isLoading = false);
+        }
         return;
       }
 
-      Fluttertoast.showToast(msg: "Login Successful!");
+      if (mounted) {
+        Fluttertoast.showToast(msg: "Login Successful!");
+      }
 
       // 🛂 If user is an admin (email contains "gov"), show PIN dialog
       if (email.contains("gov")) {
-        await Future.delayed(Duration(milliseconds: 3000));
-        _showAdminPinDialog(email);
+        await Future.delayed(const Duration(milliseconds: 3000));
+        if (mounted) {
+          _showAdminPinDialog(email);
+        }
       } else {
         // 👉 Navigate to issue selection page for regular users
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => IssueSelectionPage()),
-        );
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const IssueSelectionPage()),
+          );
+        }
       }
     } on FirebaseAuthException catch (e) {
-      Fluttertoast.showToast(
-          msg: e.message ?? "Login failed. Please try again.");
+      if (mounted) {
+        Fluttertoast.showToast(
+            msg: e.message ?? "Login failed. Please try again.");
+      }
     } catch (e) {
-      Fluttertoast.showToast(msg: "An unexpected error occurred.");
+      if (mounted) {
+        Fluttertoast.showToast(msg: "An unexpected error occurred.");
+      }
     }
 
-    setState(() {
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   // 🔐 Displays PIN prompt for admin verification before accessing dashboard
   void _showAdminPinDialog(String email) {
+    if (!mounted) return;
     TextEditingController pinController = TextEditingController();
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text("Admin Authentication"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Enter Admin PIN to access the dashboard."),
+              const Text("Enter Admin PIN to access the dashboard."),
               TextField(
                 controller: pinController,
                 obscureText: true,
@@ -112,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
             // ❌ Cancel button to close dialog
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
               child: const Text("Cancel"),
             ),
@@ -120,13 +135,24 @@ class _LoginPageState extends State<LoginPage> {
             TextButton(
               onPressed: () async {
                 if (pinController.text == "2004") {
+                  // Store references to contexts before async operations
+                  final navigator = Navigator.of(dialogContext);
+                  final mainNavigator = Navigator.of(context);
+                  
                   SharedPreferences prefs = await SharedPreferences.getInstance();
                   await prefs.setBool("isAdmin", true);
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => AdminDashboard()),
-                  );
+                  
+                  // Use stored navigator references instead of contexts
+                  if (navigator.canPop()) {
+                    navigator.pop();
+                  }
+                  
+                  // Use stored navigator reference and check mounted state
+                  if (mounted) {
+                    mainNavigator.pushReplacement(
+                      MaterialPageRoute(builder: (context) => const AdminDashboard()),
+                    );
+                  }
                 } else {
                   // 🔒 Handle incorrect PIN entry
                   Fluttertoast.showToast(msg: "Incorrect PIN! Access Denied.");

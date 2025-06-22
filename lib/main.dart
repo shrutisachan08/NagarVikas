@@ -5,21 +5,20 @@ import 'package:animate_do/animate_do.dart';
 import 'package:NagarVikas/screen/register_screen.dart';
 import 'package:NagarVikas/screen/issue_selection.dart';
 import 'package:NagarVikas/screen/admin_dashboard.dart';
-import 'package:NagarVikas/screen/login_page.dart';
+import 'package:NagarVikas/screen/login_page.dart' as login;
 import 'package:flutter/foundation.dart';
-import 'package:NagarVikas/screen/logo.dart';
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 // 🔧 Background message handler for Firebase
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print("Handling a background message: ${message.messageId}");
+  developer.log("Handling a background message: ${message.messageId}");
 }
 
 void main() async {
@@ -32,13 +31,13 @@ void main() async {
 
   // ✅ Set up notification opened handler
   OneSignal.Notifications.addClickListener((event) {
-    print("Notification Clicked: ${event.notification.body}");
+    developer.log("Notification Clicked: ${event.notification.body}");
   });
 
   // ✅ Firebase initialization for Web and Mobile
   if (kIsWeb) {
     await Firebase.initializeApp(
-      options: FirebaseOptions(
+      options: const FirebaseOptions(
         apiKey: "AIzaSyCjaGsLVhHmVGva75FLj6PiCv_Z74wGap4",
         authDomain: "nagarvikas-a1d4f.firebaseapp.com",
         projectId: "nagarvikas-a1d4f",
@@ -82,11 +81,11 @@ class AuthCheckScreen extends StatefulWidget {
   const AuthCheckScreen({super.key});
 
   @override
-  _AuthCheckScreenState createState() => _AuthCheckScreenState();
+  AuthCheckScreenState createState() => AuthCheckScreenState();
 }
 
-// ✅ State for Auth Check Screen
-class _AuthCheckScreenState extends State<AuthCheckScreen> {
+// ✅ State for Auth Check Screen - Made public
+class AuthCheckScreenState extends State<AuthCheckScreen> {
   bool _showSplash = true;
   firebase_auth.User? user;
   bool isAdmin = false;
@@ -100,16 +99,20 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     firebase_auth.FirebaseAuth.instance
         .authStateChanges()
         .listen((firebase_auth.User? newUser) {
-      setState(() {
-        user = newUser;
-      });
+      if (mounted) {
+        setState(() {
+          user = newUser;
+        });
+      }
     });
 
     // ✅ Splash screen timer
     Timer(const Duration(seconds: 9), () {
-      setState(() {
-        _showSplash = false;
-      });
+      if (mounted) {
+        setState(() {
+          _showSplash = false;
+        });
+      }
     });
   }
 
@@ -118,7 +121,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     final prefs = await SharedPreferences.getInstance();
     bool? storedIsAdmin = prefs.getBool('isAdmin');
 
-    if (storedIsAdmin != null) {
+    if (storedIsAdmin != null && mounted) {
       setState(() {
         isAdmin = storedIsAdmin;
       });
@@ -150,8 +153,12 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
 Future<void> handleAdminLogin(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool('isAdmin', true);
-  Navigator.pushReplacement(
-      context, MaterialPageRoute(builder: (context) => AdminDashboard()));
+  
+  // Check if context is still valid before navigation
+  if (context.mounted) {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => AdminDashboard()));
+  }
 }
 
 // ✅ Logout Function (Clears Admin Status & Redirects to Login)
@@ -160,8 +167,12 @@ Future<void> handleLogout(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove('isAdmin'); // ✅ Clear admin status 
   await firebase_auth.FirebaseAuth.instance.signOut(); 
-  Navigator.pushReplacement( // ✅ Redirect to Login Page
-      context, MaterialPageRoute(builder: (context) => const LoginPage())); // ✅ Fix: Use const for LoginPage to avoid unnecessary rebuilds
+  
+  // Check if context is still valid before navigation
+  if (context.mounted) {
+    Navigator.pushReplacement( // ✅ Redirect to Login Page
+        context, MaterialPageRoute(builder: (context) => const login.LoginPage())); // ✅ Fix: Use prefixed LoginPage to avoid conflicts
+  }
 }
 
 /// SplashScreen - displays an animated logo on app launch
@@ -170,11 +181,58 @@ class SplashScreen extends StatelessWidget {
 
   @override // Build Method for Splash Screen
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 252, 252, 252),
+    return const Scaffold(
+      backgroundColor: Color.fromARGB(255, 252, 252, 252),
       body: Center(
-        child: LogoWidget(),
+        child: _LogoWidget(), // ✅ Fixed: Using local LogoWidget definition
       ),
+    );
+  }
+}
+
+/// Local LogoWidget - Simple logo display for splash screen
+class _LogoWidget extends StatelessWidget {
+  const _LogoWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // App Logo or Icon
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            color: Colors.deepPurple,
+            borderRadius: BorderRadius.circular(60),
+          ),
+          child: const Icon(
+            Icons.location_city,
+            size: 60,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 20),
+        // App Name
+        const Text(
+          'NagarVikas',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Tagline
+        const Text(
+          'Civic Issues Made Easy',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black54,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -184,10 +242,11 @@ class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
   @override 
-  _WelcomeScreenState createState() => _WelcomeScreenState();
+  WelcomeScreenState createState() => WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
+// ✅ Made WelcomeScreenState public
+class WelcomeScreenState extends State<WelcomeScreen> {
   bool _isLoading = false;
 
   void _onGetStartedPressed() {
@@ -196,14 +255,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     });
     // ✅ Simulate a delay for loading effect
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const RegisterScreen()),
-      ).then((_) {
-        setState(() {
-          _isLoading = false;
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const RegisterScreen()),
+        ).then((_) {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
         });
-      });
+      }
     });
   }
 
@@ -249,9 +312,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             // ✅ Headline & Subtext
             FadeInUp(
               duration: const Duration(milliseconds: 1200),
-              child: Column(
+              child: const Column(
                 children: [
-                  const Text(
+                  Text(
                     "Facing Civic Issues?",
                     style: TextStyle(
                       fontSize: 28,
@@ -259,9 +322,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(
+                  SizedBox(
                       height: 10), // Space between heading and subtext
-                  const Text(
+                  Text(
                     "Register your complaint now and\nget it done in few time.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
