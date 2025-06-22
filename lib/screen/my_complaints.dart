@@ -78,10 +78,6 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
     });
   }
 
-  void _searchComplaints(String query) {
-    _applyFilters();
-  }
-
   void _applyFilters() {
     String query = searchController.text;
     setState(() {
