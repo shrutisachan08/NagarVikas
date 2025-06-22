@@ -9,7 +9,7 @@ class StreetLightPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Street Lights Issue"),
-        backgroundColor: const Color.fromARGB(255, 3, 137, 221),
+        backgroundColor: const Color.fromARGB(255, 4, 204, 240),
         foregroundColor: Colors.black,
         elevation: 1,
       ),

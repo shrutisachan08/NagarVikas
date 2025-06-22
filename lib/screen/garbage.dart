@@ -10,7 +10,7 @@ class GarbagePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Garbage Issue"),
-        backgroundColor: const Color.fromARGB(255, 2, 143, 186),
+        backgroundColor: const Color.fromARGB(255, 4, 204, 240),
         foregroundColor: Colors.black,
         elevation: 1,
       ),

@@ -9,7 +9,7 @@ class WaterPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Water Issue"),
-        backgroundColor: const Color.fromARGB(255, 2, 114, 184),
+        backgroundColor: const Color.fromARGB(255, 4, 204, 240),
         foregroundColor: Colors.black,
         elevation: 1,
       ),
