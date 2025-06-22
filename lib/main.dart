@@ -1,12 +1,13 @@
 // 📦 Importing necessary packages and screens
+//import 'package:nagar_vikas/service/connectivity_overlay.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:nagar_vikas/screen/register_screen.dart';
-import 'package:nagar_vikas/screen/issue_selection.dart';
 import 'package:nagar_vikas/screen/admin_dashboard.dart';
 import 'package:nagar_vikas/screen/login_page.dart' as login;
 import 'package:flutter/foundation.dart';
+//import 'package:nagar_vikas/screen/logo.dart' as logo;
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -14,6 +15,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:nagar_vikas/theme/theme_provider.dart';
 
 // 🔧 Background message handler for Firebase
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -48,13 +51,26 @@ void main() async {
       ),
     );
   } else {
-    await Firebase.initializeApp(); // This might fail if no default options
+    await Firebase.initializeApp();
   }
   // ✅ Register background handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+  // ✅ Initialize connectivity service (if available)
+  try {
+    // Uncomment this line when ConnectivityService is properly implemented
+    // await ConnectivityService().initialize();
+  } catch (e) {
+    developer.log("ConnectivityService not available: $e");
+  }
+
   // ✅ Run the app
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 // ✅ Main Application Widget
@@ -63,15 +79,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'NagarVikas',
       theme: ThemeData(
         textTheme: GoogleFonts.nunitoTextTheme(),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.deepPurple, brightness: Brightness.light),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        textTheme: GoogleFonts.nunitoTextTheme(ThemeData.dark().textTheme),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.deepPurple, brightness: Brightness.dark),
+        useMaterial3: true,
+      ),
+      themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      // Use ConnectivityOverlay if available, otherwise use AuthCheckScreen directly
       home: const AuthCheckScreen(),
+      // Uncomment below line when ConnectivityOverlay is properly implemented
+      // home: ConnectivityOverlay(child: const AuthCheckScreen()),
     );
   }
 }
@@ -84,7 +112,7 @@ class AuthCheckScreen extends StatefulWidget {
   AuthCheckScreenState createState() => AuthCheckScreenState();
 }
 
-// ✅ State for Auth Check Screen - Made public
+// ✅ State for Auth Check Screen
 class AuthCheckScreenState extends State<AuthCheckScreen> {
   bool _showSplash = true;
   firebase_auth.User? user;
@@ -95,7 +123,7 @@ class AuthCheckScreenState extends State<AuthCheckScreen> {
     super.initState();
     _checkLastLogin();
 
-    // ✅ Listen for authentication state changes like(login/logout changes)
+    // ✅ Listen for authentication state changes
     firebase_auth.FirebaseAuth.instance
         .authStateChanges()
         .listen((firebase_auth.User? newUser) {
@@ -116,7 +144,7 @@ class AuthCheckScreenState extends State<AuthCheckScreen> {
     });
   }
 
-  // ✅ Check Last Login (Fix for User Going to Admin Dashboard)
+  // ✅ Check Last Login
   Future<void> _checkLastLogin() async {
     final prefs = await SharedPreferences.getInstance();
     bool? storedIsAdmin = prefs.getBool('isAdmin');
@@ -139,39 +167,75 @@ class AuthCheckScreenState extends State<AuthCheckScreen> {
     if (user == null) {
       return const WelcomeScreen();
     } else {
-      // ✅ Admin should only go to AdminDashboard IF they were last logged in as Admin
-      if (isAdmin && user!.email!.contains("gov")) {
-        return AdminDashboard();
+      if (isAdmin && user!.email?.contains("gov") == true) {
+        return const AdminDashboard();
       } else {
-        return const IssueSelectionPage();
+        // Return a placeholder home screen since BottomNavBar doesn't exist
+        return const HomeScreen();
       }
     }
   }
 }
 
-// ✅ Admin Login Function (Stores Admin Status)
+// ✅ Placeholder Home Screen (Replace with your actual home screen)
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => handleLogout(context),
+          ),
+        ],
+      ),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.home, size: 100, color: Colors.deepPurple),
+            SizedBox(height: 20),
+            Text(
+              'Welcome to NagarVikas!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Your civic complaint management app',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ✅ Admin Login Function
 Future<void> handleAdminLogin(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool('isAdmin', true);
   
-  // Check if context is still valid before navigation
   if (context.mounted) {
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => AdminDashboard()));
+        context, MaterialPageRoute(builder: (context) => const AdminDashboard()));
   }
 }
 
-// ✅ Logout Function (Clears Admin Status & Redirects to Login)
+// ✅ Logout Function
 Future<void> handleLogout(BuildContext context) async {
-  // Clear stored admin status
   final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('isAdmin'); // ✅ Clear admin status 
-  await firebase_auth.FirebaseAuth.instance.signOut(); 
+  await prefs.remove('isAdmin');
+  await firebase_auth.FirebaseAuth.instance.signOut();
   
-  // Check if context is still valid before navigation
   if (context.mounted) {
-    Navigator.pushReplacement( // ✅ Redirect to Login Page
-        context, MaterialPageRoute(builder: (context) => const login.LoginPage())); // ✅ Fix: Use prefixed LoginPage to avoid conflicts
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const login.LoginPage()));
   }
 }
 
@@ -179,60 +243,55 @@ Future<void> handleLogout(BuildContext context) async {
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
-  @override // Build Method for Splash Screen
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color.fromARGB(255, 252, 252, 252),
-      body: Center(
-        child: _LogoWidget(), // ✅ Fixed: Using local LogoWidget definition
-      ),
-    );
-  }
-}
-
-/// Local LogoWidget - Simple logo display for splash screen
-class _LogoWidget extends StatelessWidget {
-  const _LogoWidget();
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // App Logo or Icon
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.deepPurple,
-            borderRadius: BorderRadius.circular(60),
-          ),
-          child: const Icon(
-            Icons.location_city,
-            size: 60,
-            color: Colors.white,
-          ),
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 252, 252, 252),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // App Logo Animation
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0.0, end: 1.0),
+              duration: const Duration(seconds: 2),
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple.withValues(alpha: 0.8),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.location_city,
+                      size: 60,
+                      color: Colors.white,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 30),
+            // App Name
+            const Text(
+              'NagarVikas',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple,
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Loading indicator
+            const CircularProgressIndicator(
+              color: Colors.deepPurple,
+            ),
+          ],
         ),
-        const SizedBox(height: 20),
-        // App Name
-        const Text(
-          'NagarVikas',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 10),
-        // Tagline
-        const Text(
-          'Civic Issues Made Easy',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.black54,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -241,11 +300,10 @@ class _LogoWidget extends StatelessWidget {
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
-  @override 
+  @override
   WelcomeScreenState createState() => WelcomeScreenState();
 }
 
-// ✅ Made WelcomeScreenState public
 class WelcomeScreenState extends State<WelcomeScreen> {
   bool _isLoading = false;
 
@@ -253,7 +311,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     setState(() {
       _isLoading = true;
     });
-    // ✅ Simulate a delay for loading effect
+    
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         Navigator.push(
@@ -270,10 +328,42 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     });
   }
 
-  @override 
-  Widget build(BuildContext context) { 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 253, 253, 253),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.deepPurple,
+              ),
+              child: Text(
+                'Settings',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            Consumer<ThemeProvider>(
+              builder: (context, themeProvider, _) => SwitchListTile(
+                title: const Text("Dark Mode"),
+                value: themeProvider.isDarkMode,
+                onChanged: (value) => themeProvider.toggleTheme(),
+                secondary: const Icon(Icons.dark_mode),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text("Logout"),
+              onTap: () => handleLogout(context),
+            ),
+          ],
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -288,8 +378,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                 child: Container(
                   width: 120,
                   height: 120,
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 133, 207, 239),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 133, 207, 239).withValues(alpha: 0.8),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -297,14 +387,21 @@ class WelcomeScreenState extends State<WelcomeScreen> {
             ),
             const SizedBox(height: 30),
 
-            // ✅ Main Image Animation
+            // ✅ Main Image Animation - Using placeholder since asset might not exist
             ZoomIn(
               duration: const Duration(milliseconds: 1200),
-              child: Image.asset(
-                'assets/mobileprofile.png',
+              child: Container(
                 width: 300,
                 height: 300,
-                fit: BoxFit.contain,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.report_problem,
+                  size: 150,
+                  color: Colors.deepPurple,
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -322,10 +419,9 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(
-                      height: 10), // Space between heading and subtext
+                  SizedBox(height: 10),
                   Text(
-                    "Register your complaint now and\nget it done in few time.",
+                    "Register your complaint now and\nget it done in few time..",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,
@@ -339,24 +435,25 @@ class WelcomeScreenState extends State<WelcomeScreen> {
             const SizedBox(height: 50),
 
             // ✅ Get Started Button
-            FadeInUp( // Animation for button
+            FadeInUp(
               duration: const Duration(milliseconds: 1600),
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _onGetStartedPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 8, 8, 8),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 90, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 90, vertical: 15),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                ), // ✅ Button style
-                child: _isLoading 
+                ),
+                child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Get Started",
+                    : const Text(
+                        "Get Started",
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white)),
+                            color: Colors.white),
+                      ),
               ),
             ),
           ],
