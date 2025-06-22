@@ -17,6 +17,7 @@ class _ComplaintDetailPageState extends State<ComplaintDetailPage> {
   late String selectedStatus;
   VideoPlayerController? _videoController;
   bool _videoInitialized = false;
+  bool _isMuted = true;
 
   @override
   void initState() {
@@ -56,6 +57,7 @@ class _ComplaintDetailPageState extends State<ComplaintDetailPage> {
     if (type == "video" && url.isNotEmpty) {
       _videoController = VideoPlayerController.networkUrl(Uri.parse(url))
         ..initialize().then((_) {
+          _videoController!.setVolume(_isMuted ? 0 : 1);
           setState(() => _videoInitialized = true);
         }).catchError((e) {
           debugPrint("Video init failed: $e");
@@ -196,19 +198,52 @@ class _ComplaintDetailPageState extends State<ComplaintDetailPage> {
               aspectRatio: _videoController!.value.aspectRatio,
               child: VideoPlayer(_videoController!),
             ),
-            IconButton(
-              icon: Icon(
-                _videoController!.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                color: Colors.white,
-                size: 40,
+
+            // Center play/pause button
+            Container(
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
               ),
-              onPressed: () {
-                setState(() {
-                  _videoController!.value.isPlaying
-                      ? _videoController!.pause()
-                      : _videoController!.play();
-                });
-              },
+              child: IconButton(
+                icon: Icon(
+                  _videoController!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _videoController!.value.isPlaying
+                        ? _videoController!.pause()
+                        : _videoController!.play();
+                  });
+                },
+              ),
+            ),
+
+            // Bottom-right mute toggle
+            Positioned(
+              bottom: 8,
+              right: 8,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    _isMuted ? Icons.volume_off : Icons.volume_up,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isMuted = !_isMuted;
+                      _videoController!.setVolume(_isMuted ? 0 : 1);
+                    });
+                  },
+                ),
+              ),
             ),
           ],
         );
