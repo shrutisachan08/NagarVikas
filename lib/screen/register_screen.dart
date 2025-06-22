@@ -13,8 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:NagarVikas/screen/login_page.dart';
-import 'package:NagarVikas/screen/issue_selection.dart';
+import 'package:nagar_vikas/screen/login_page.dart';
+import 'package:nagar_vikas/screen/issue_selection.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 // Register screen widget

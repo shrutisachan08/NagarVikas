@@ -1,8 +1,8 @@
 // Importing necessary Flutter and plugin packages
-import 'package:NagarVikas/screen/about.dart';
-import 'package:NagarVikas/screen/contact.dart';
-import 'package:NagarVikas/screen/facing_issues.dart';
-import 'package:NagarVikas/screen/login_page.dart';
+import 'package:nagar_vikas/screen/about.dart';
+import 'package:nagar_vikas/screen/contact.dart';
+import 'package:nagar_vikas/screen/facing_issues.dart';
+import 'package:nagar_vikas/screen/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';

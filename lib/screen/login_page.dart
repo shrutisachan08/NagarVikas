@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:NagarVikas/screen/issue_selection.dart';
-import 'package:NagarVikas/screen/register_screen.dart';
-import 'package:NagarVikas/screen/admin_dashboard.dart';
+import 'package:nagar_vikas/screen/issue_selection.dart';
+import 'package:nagar_vikas/screen/register_screen.dart';
+import 'package:nagar_vikas/screen/admin_dashboard.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

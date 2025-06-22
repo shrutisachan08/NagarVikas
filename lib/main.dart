@@ -2,10 +2,10 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:NagarVikas/screen/register_screen.dart';
-import 'package:NagarVikas/screen/issue_selection.dart';
-import 'package:NagarVikas/screen/admin_dashboard.dart';
-import 'package:NagarVikas/screen/login_page.dart' as login;
+import 'package:nagar_vikas/screen/register_screen.dart';
+import 'package:nagar_vikas/screen/issue_selection.dart';
+import 'package:nagar_vikas/screen/admin_dashboard.dart';
+import 'package:nagar_vikas/screen/login_page.dart' as login;
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'dart:developer' as developer;
