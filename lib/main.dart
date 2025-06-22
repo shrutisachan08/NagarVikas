@@ -1,4 +1,5 @@
 // 📦 Importing necessary packages and screens
+ fix/no-complaints-message
 //import 'package:nagar_vikas/service/connectivity_overlay.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,16 @@ import 'package:animate_do/animate_do.dart';
 import 'package:nagar_vikas/screen/register_screen.dart';
 import 'package:nagar_vikas/screen/admin_dashboard.dart';
 import 'package:nagar_vikas/screen/login_page.dart' as login;
+=======
+import 'package:NagarVikas/service/ConnectivityService.dart';
+import 'package:NagarVikas/widgets/bottom_nav_bar.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:NagarVikas/screen/register_screen.dart';
+import 'package:NagarVikas/screen/admin_dashboard.dart';
+import 'package:NagarVikas/screen/login_page.dart';
+main
 import 'package:flutter/foundation.dart';
 //import 'package:nagar_vikas/screen/logo.dart' as logo;
 import 'dart:async';
@@ -16,7 +27,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+ fix/no-complaints-message
 import 'package:nagar_vikas/theme/theme_provider.dart';
+import 'package:NagarVikas/theme/theme_provider.dart';
+ main
 
 // 🔧 Background message handler for Firebase
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -65,6 +79,9 @@ void main() async {
   }
 
   // ✅ Run the app
+fix/no-complaints-message
+  await ConnectivityService().initialize();
+ main
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
@@ -96,10 +113,14 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+ fix/no-complaints-message
       // Use ConnectivityOverlay if available, otherwise use AuthCheckScreen directly
       home: const AuthCheckScreen(),
       // Uncomment below line when ConnectivityOverlay is properly implemented
       // home: ConnectivityOverlay(child: const AuthCheckScreen()),
+
+      home: ConnectivityOverlay(child: const AuthCheckScreen()),
+main
     );
   }
 }
@@ -168,10 +189,16 @@ class AuthCheckScreenState extends State<AuthCheckScreen> {
       return const WelcomeScreen();
     } else {
       if (isAdmin && user!.email?.contains("gov") == true) {
+ fix/no-complaints-message
         return const AdminDashboard();
       } else {
         // Return a placeholder home screen since BottomNavBar doesn't exist
         return const HomeScreen();
+
+        return AdminDashboard();
+      } else {
+        return const BottomNavBar();
+ main
       }
     }
   }
@@ -229,6 +256,7 @@ Future<void> handleAdminLogin(BuildContext context) async {
 // ✅ Logout Function
 Future<void> handleLogout(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
+ fix/no-complaints-message
   await prefs.remove('isAdmin');
   await firebase_auth.FirebaseAuth.instance.signOut();
   
@@ -237,6 +265,16 @@ Future<void> handleLogout(BuildContext context) async {
         context,
         MaterialPageRoute(builder: (context) => const login.LoginPage()));
   }
+
+  await prefs.remove('isAdmin'); // ✅ Clear admin status
+  await firebase_auth.FirebaseAuth.instance.signOut();
+  Navigator.pushReplacement(
+      // ✅ Redirect to Login Page
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              const LoginPage())); // ✅ Fix: Use const for LoginPage to avoid unnecessary rebuilds
+main
 }
 
 /// SplashScreen - displays an animated logo on app launch
@@ -301,7 +339,10 @@ class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
+ fix/no-complaints-message
   WelcomeScreenState createState() => WelcomeScreenState();
+  _WelcomeScreenState createState() => _WelcomeScreenState();
+main
 }
 
 class WelcomeScreenState extends State<WelcomeScreen> {
@@ -419,8 +460,13 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                       color: Colors.black,
                     ),
                   ),
+fix/no-complaints-message
                   SizedBox(height: 10),
                   Text(
+                  const SizedBox(
+                      height: 10), // Space between heading and subtext
+                  const Text(
+ main
                     "Register your complaint now and\nget it done in few time..",
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -436,6 +482,9 @@ class WelcomeScreenState extends State<WelcomeScreen> {
 
             // ✅ Get Started Button
             FadeInUp(
+fix/no-complaints-message
+              // Animation for button
+              main
               duration: const Duration(milliseconds: 1600),
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _onGetStartedPressed,
@@ -444,7 +493,11 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 90, vertical: 15),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
+ fix/no-complaints-message
                 ),
+
+                ), // ✅ Button style
+ main
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text(

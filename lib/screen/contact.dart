@@ -70,8 +70,14 @@ class ContactUsPage extends StatelessWidget {
   }
 
   // Function to launch the phone dialer
+ fix/no-complaints-message
   void _launchPhoneDialer() async {
     final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+
+  _launchPhoneDialer() async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+
+ main
     if (await canLaunchUrl(phoneUri)) {
       await launchUrl(phoneUri);
     } else {
@@ -80,6 +86,7 @@ class ContactUsPage extends StatelessWidget {
   }
 
   // Function to launch the email client
+ fix/no-complaints-message
   void _launchEmailClient() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
@@ -90,6 +97,49 @@ class ContactUsPage extends StatelessWidget {
       await launchUrl(emailUri);
     } else {
       throw 'Could not launch $emailUri';
+
+  _launchEmailClient() async {
+    final String subject = 'Support Request - Nagar Vikas';
+    final String body = 'Hi team,\n\nI need help with ';
+
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      queryParameters: {
+        'subject': subject,
+        'body': body,
+      },
+    );
+
+    String emailUrl = emailLaunchUri.toString();
+
+    // Replace + with %20 to fix space encoding for mailto
+    emailUrl = emailUrl.replaceAll('+', '%20');
+
+    try {
+      final bool launched = await launchUrl(
+        Uri.parse(emailUrl),
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        // Gmail fallback
+        final fallbackUrl = Uri.parse(
+          'https://mail.google.com/mail/?view=cm&fs=1'
+              '&to=${Uri.encodeComponent(email)}'
+              '&su=${Uri.encodeComponent(subject)}'
+              '&body=${Uri.encodeComponent(body)}',
+        );
+
+        if (await canLaunchUrl(fallbackUrl)) {
+          await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
+        } else {
+          throw 'No email app or Gmail available.';
+        }
+      }
+    } catch (e) {
+      debugPrint('Email launch error: $e');
+ main
     }
   }
 }

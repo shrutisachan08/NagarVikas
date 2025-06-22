@@ -1,6 +1,11 @@
+// AdminDashboard.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/firebase_database.dart'
+ fix/no-complaints-message
+import 'dart:async';
+import './ComplaintDetailPage.dart';
+ main
 import 'login_page.dart';
 
 class AdminDashboard extends StatefulWidget {
@@ -10,35 +15,66 @@ class AdminDashboard extends StatefulWidget {
   AdminDashboardState createState() => AdminDashboardState();
 }
 
+ fix/no-complaints-message
 class AdminDashboardState extends State<AdminDashboard> {
+
+class _AdminDashboardState extends State<AdminDashboard> {
+  main
   int totalComplaints = 0;
   int pendingComplaints = 0;
   int inProgressComplaints = 0;
   int resolvedComplaints = 0;
+ fix/no-complaints-message
   List<Map<String, dynamic>> complaints = [];
   List<Map<String, dynamic>> filteredComplaints = [];
+
+  List<Map<String, dynamic>> complaints = [];
+  List<Map<String, dynamic>> filteredComplaints = [];
+
+ main
   TextEditingController searchController = TextEditingController();
+  StreamSubscription? _complaintsSubscription;
 
   @override
   void initState() {
     super.initState();
     _fetchComplaints();
+fix/no-complaints-message
+  }
+
+  @override
+  void dispose() {
+    _complaintsSubscription?.cancel();
+    searchController.dispose();
+    super.dispose();
+    main
   }
 
   Future<void> _fetchComplaints() async {
     DatabaseReference complaintsRef = FirebaseDatabase.instance.ref('complaints');
     DatabaseReference usersRef = FirebaseDatabase.instance.ref('users');
 
-    complaintsRef.onValue.listen((complaintEvent) async {
+    _complaintsSubscription = complaintsRef.onValue.listen((complaintEvent) async {
+      if (!mounted) return;
+
       final complaintData = complaintEvent.snapshot.value as Map<dynamic, dynamic>?;
 
       if (complaintData == null) {
+ fix/no-complaints-message
         if (!mounted) return;
         setState(() {
           totalComplaints = pendingComplaints = inProgressComplaints = resolvedComplaints = 0;
           complaints = [];
           filteredComplaints = [];
         });
+        if (mounted) {
+          setState(() {
+            totalComplaints = pendingComplaints = inProgressComplaints = resolvedComplaints = 0;
+            complaints = [];
+            filteredComplaints = [];
+          });
+        }
+ main
         return;
       }
 
@@ -50,8 +86,9 @@ class AdminDashboardState extends State<AdminDashboard> {
         String userId = complaint["user_id"] ?? "Unknown";
 
         DataSnapshot userSnapshot = await usersRef.child(userId).get();
-        Map<String, dynamic>? userData =
-            userSnapshot.value != null ? Map<String, dynamic>.from(userSnapshot.value as Map) : null;
+        Map<String, dynamic>? userData = userSnapshot.value != null
+            ? Map<String, dynamic>.from(userSnapshot.value as Map)
+            : null;
 
         String status = complaint["status"]?.toString() ?? "Pending";
         if (status == "Pending") pending++;
@@ -68,6 +105,14 @@ class AdminDashboardState extends State<AdminDashboard> {
           time = "${dateTime.hour}:${dateTime.minute}";
         }
 
+fix/no-complaints-message
+        String? mediaUrl = complaint["media_url"] ?? complaint["image_url"] ?? "";
+        String mediaType = (complaint["media_type"] ??
+            (complaint["image_url"] != null ? "image" : "video"))
+            .toString()
+            .toLowerCase();
+
+main
         loadedComplaints.add({
           "id": entry.key,
           "issue_type": complaint["issue_type"] ?? "Unknown",
@@ -78,13 +123,15 @@ class AdminDashboardState extends State<AdminDashboard> {
           "date": date,
           "time": time,
           "status": status,
-          "image_url": complaint["image_url"] ?? "",
+          "media_url": (mediaUrl ?? '').isEmpty ? 'https://picsum.photos/250?image=9' : mediaUrl,
+          "media_type": mediaType,
           "user_id": userId,
           "user_name": userData?["name"] ?? "Unknown",
           "user_email": userData?["email"] ?? "Unknown",
         });
       }
 
+ fix/no-complaints-message
       if (!mounted) return;
       setState(() {
         totalComplaints = total;
@@ -94,6 +141,17 @@ class AdminDashboardState extends State<AdminDashboard> {
         complaints = loadedComplaints;
         filteredComplaints = complaints;
       });
+      if (mounted) {
+        setState(() {
+          totalComplaints = total;
+          pendingComplaints = pending;
+          inProgressComplaints = inProgress;
+          resolvedComplaints = resolved;
+          complaints = loadedComplaints;
+          filteredComplaints = complaints;
+        });
+      }
+      main
     });
   }
 
@@ -106,6 +164,7 @@ class AdminDashboardState extends State<AdminDashboard> {
     });
   }
 
+ fix/no-complaints-message
   void _updateComplaintStatus(String complaintId, String newStatus) {
     FirebaseDatabase.instance.ref('complaints/$complaintId').update({"status": newStatus});
   }
@@ -137,11 +196,25 @@ class AdminDashboardState extends State<AdminDashboard> {
           ),
         ],
       ),
+
+  Route _createSlideRoute(Map<String, dynamic> complaint) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          ComplaintDetailPage(complaintId: complaint["id"]),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.easeInOut;
+        final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        return SlideTransition(position: animation.drive(tween), child: child);
+      },
+ main
     );
   }
 
   @override
   Widget build(BuildContext context) {
+ fix/no-complaints-message
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -214,14 +287,101 @@ class AdminDashboardState extends State<AdminDashboard> {
                             ),
                           );
                         },
-                      ),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF0F9FF),
+      appBar: AppBar(
+        title: const Text("Admin Dashboard", style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color.fromARGB(255, 4, 204, 240),
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+              );
+            },
+          )
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  )
+                ],
               ),
-            ],
-          ),
+              child: TextField(
+                controller: searchController,
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: "Search complaints...",
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14), // updated
+                ),
+                onChanged: _searchComplaints,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: filteredComplaints.length,
+                itemBuilder: (ctx, index) {
+                  final complaint = filteredComplaints[index];
+                  return Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 3,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(12),
+                      leading: complaint["media_type"] == "image"
+                          ? ClipOval(
+                        child: Image.network(
+                          complaint["media_url"],
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image, size: 40),
+                        ),
+                      )
+                          : const CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.grey,
+                        child: Icon(Icons.videocam, color: Colors.white),
+                      ),
+                      title: Text(
+                        complaint["issue_type"] ?? "Unknown",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text("Status: ${complaint["status"]}"),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () => Navigator.of(context).push(
+                        _createSlideRoute(complaint),
+main
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+ fix/no-complaints-message
 
   void _showComplaintDetails(BuildContext context, Map<String, dynamic> complaint) {
     String selectedStatus = complaint["status"];
@@ -279,3 +439,5 @@ class AdminDashboardState extends State<AdminDashboard> {
     );
   }
 }
+}
+main

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+fix/no-complaints-message
 import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -11,11 +12,14 @@ import 'package:animate_do/animate_do.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../components/shared_issue_form.dart';
+ main
 
-class NewEntryPage extends StatefulWidget {
+class NewEntryPage extends StatelessWidget {
   const NewEntryPage({super.key});
 
   @override
+ fix/no-complaints-message
   NewEntryPageState createState() => NewEntryPageState();
 }
 
@@ -259,10 +263,11 @@ class NewEntryPageState extends State<NewEntryPage> {
   }
 
   @override
+ main
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
+ fix/no-complaints-message
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: FadeInDown(
@@ -424,3 +429,18 @@ class NewEntryPageState extends State<NewEntryPage> {
     );
   }
 }
+        title: const Text("New Issue"),
+        backgroundColor: const Color.fromARGB(255, 4, 204, 240),
+        foregroundColor: Colors.black,
+        elevation: 1,
+      ),
+      body: const SharedIssueForm(
+        issueType: "New Issue",
+        headingText: "Enter new issue",
+        infoText: "Please give accurate and correct information for a faster solution.",
+        imageAsset: "assets/selected.png",
+      ),
+    );
+  }
+}
+ main

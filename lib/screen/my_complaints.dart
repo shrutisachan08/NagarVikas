@@ -13,9 +13,15 @@ class MyComplaintsScreen extends StatefulWidget {
 
 class MyComplaintsScreenState extends State<MyComplaintsScreen> {
   List<Map<String, dynamic>> complaints = [];
+  List<Map<String, dynamic>> filteredComplaints = []; // Added for search
+  TextEditingController searchController = TextEditingController(); // Added
+
   bool _isLoading = true;
+ fix/no-complaints-message
   bool isAdmin = false;
   final Set<String> _updatingFlags = {}; // Track which flags are being updated
+  String selectedStatus = 'All'; // <-- Add this for status filter
+  main
 
   @override
   void initState() {
@@ -46,12 +52,19 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
       final data = event.snapshot.value as Map<dynamic, dynamic>?;
 
       if (data == null) {
+ fix/no-complaints-message
         if (mounted) {
           setState(() {
             complaints = [];
             _isLoading = false;
           });
         }
+        setState(() {
+          complaints = [];
+          filteredComplaints = []; // Clear filtered
+          _isLoading = false;
+        });
+ main
         return;
       }
 
@@ -87,6 +100,7 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
         });
       });
 
+ fix/no-complaints-message
       if (mounted) {
         setState(() {
           complaints = loadedComplaints;
@@ -102,6 +116,12 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
     
     setState(() {
       _updatingFlags.add(complaintId);
+      setState(() {
+        complaints = loadedComplaints;
+        _applyFilters(); // Use new filter logic
+        _isLoading = false;
+      });
+      main
     });
 
     try {
@@ -138,6 +158,20 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
         });
       }
     }
+  }
+
+  void _applyFilters() {
+    String query = searchController.text;
+    setState(() {
+      filteredComplaints = complaints.where((complaint) {
+        final matchesStatus = selectedStatus == 'All' ||
+            complaint['status'].toString().toLowerCase() == selectedStatus.toLowerCase();
+        final matchesQuery = query.isEmpty ||
+            complaint.values.any((value) =>
+                value.toString().toLowerCase().contains(query.toLowerCase()));
+        return matchesStatus && matchesQuery;
+      }).toList();
+    });
   }
 
   Color _getStatusColor(String status) {
@@ -219,6 +253,7 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                     ],
                   ),
                 )
+fix/no-complaints-message
               : ListView.builder(
                   itemCount: complaints.length,
                   padding: const EdgeInsets.all(10),
@@ -286,10 +321,109 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 10,
+
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: searchController,
+                              onChanged: (val) => _applyFilters(),
+                              decoration: InputDecoration(
+                                hintText: 'Search complaints...',
+                                prefixIcon: Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          DropdownButton<String>(
+                            value: selectedStatus,
+                            items: [
+                              'All',
+                              'Pending',
+                              'In Progress',
+                              'Resolved',
+                            ].map((status) => DropdownMenuItem(
+                                  value: status,
+                                  child: Text(status),
+                                ))
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  selectedStatus = value;
+                                });
+                                _applyFilters();
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: _fetchComplaints,
+                        child: ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: filteredComplaints.length,
+                          padding: EdgeInsets.all(10),
+                          itemBuilder: (ctx, index) {
+                            final complaint = filteredComplaints[index];
+                            return Container(
+                              margin: EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(15),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Status Tag
+                                    Align(
+                                      alignment: Alignment.topRight,
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: _getStatusColor(
+                                              complaint['status']),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              spreadRadius: 1,
+                                              blurRadius: 3,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          complaint['status'],
+                                          style: TextStyle(
+                                            color: Colors.white,
+ main
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
+ fix/no-complaints-message
                                   ],
                                 ),
                                 if (isAdmin)
@@ -370,18 +504,101 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                     style: const TextStyle(
                                       color: Colors.black87,
                                       fontWeight: FontWeight.w500,
+
                                     ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                    SizedBox(height: 5),
+
+                                    // Title Row with Icon
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          _getComplaintIcon(
+                                              complaint['issue']),
+                                          color: Colors.blueAccent,
+                                          size: 22,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            complaint['issue'],
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    SizedBox(height: 10),
+                                    Divider(color: Colors.grey[300]),
+
+                                    // Date & Time Row
+                                    Row(
+                                      children: [
+                                        Icon(Icons.calendar_today,
+                                            size: 16,
+                                            color: Colors.grey[600]),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          complaint['date'],
+                                          style:
+                                              TextStyle(color: Colors.black54),
+                                        ),
+                                        SizedBox(width: 15),
+                                        Icon(Icons.access_time,
+                                            size: 16,
+                                            color: Colors.grey[600]),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          complaint['time'],
+                                          style:
+                                              TextStyle(color: Colors.black54),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10),
+
+                                    // Location Row
+                                    Row(
+                                      children: [
+                                        Icon(Icons.location_on,
+                                            size: 18,
+                                            color: Colors.redAccent),
+                                        SizedBox(width: 5),
+                                        Expanded(
+                                          child: Text(
+                                            "${complaint['location']}, ${complaint['city']}, ${complaint['state']}",
+                                            style: TextStyle(
+                                              color: Colors.black87,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+ main
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                            );
+                          },
                         ),
                       ),
+ fix/no-complaints-message
                     );
                   },
                 ),
     );
   }
 }
+
+                    ),
+                  ],
+                ),
+    );
+  }
+}
+ main
