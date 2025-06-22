@@ -117,7 +117,7 @@ class _SharedIssueFormState extends State<SharedIssueForm> {
       final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
       final place = placemarks.first;
       setState(() {
-        _locationController.text = "${place.locality}, ${place.administrativeArea}";
+        _locationController.text = "${place.subLocality}, ${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}, ${place.isoCountryCode}";
       });
     } catch (e) {
       Fluttertoast.showToast(msg: "Failed to get location: $e");
