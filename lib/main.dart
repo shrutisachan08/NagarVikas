@@ -39,6 +39,7 @@ void main() async {
         messagingSenderId: "847955234719",
         appId: "1:847955234719:web:ac2b6da7a3a0715adfb7aa",
         measurementId: "G-ZZMV642TW3",
+        databaseURL: "https://nagarvikas-a1d4f.firebaseio.com",
       ),
     );
   } else {
