@@ -90,7 +90,8 @@ class FeedbackPageState extends State<FeedbackPage> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
       ),
       style: const TextStyle(color: Colors.black),
     );

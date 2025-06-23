@@ -104,8 +104,8 @@ class DrainagePageState extends State<DrainagePage> {
       return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(
-        locationSettings: settings);
+    Position position =
+        await Geolocator.getCurrentPosition(locationSettings: settings);
 
     try {
       List<Placemark> placemarks =
@@ -199,7 +199,7 @@ class DrainagePageState extends State<DrainagePage> {
           child: const Text(
             "Drainage issue selected",
             style: TextStyle(
-              color: Colors.black, fontSize: 18, fontWeight: FontWeight.w900),
+                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w900),
           ),
         ),
         centerTitle: true,
@@ -240,7 +240,8 @@ class DrainagePageState extends State<DrainagePage> {
               hint: const Text("Select City"),
               items: _selectedState != null
                   ? _states[_selectedState]!
-                      .map((city) => DropdownMenuItem(value: city, child: Text(city)))
+                      .map((city) =>
+                          DropdownMenuItem(value: city, child: Text(city)))
                       .toList()
                   : [],
               onChanged: (value) {
@@ -292,9 +293,7 @@ class DrainagePageState extends State<DrainagePage> {
                     const Icon(Icons.image, color: Colors.black54),
                     const SizedBox(width: 10),
                     Text(
-                      _selectedImage == null
-                          ? "Upload Image"
-                          : "Change Image",
+                      _selectedImage == null ? "Upload Image" : "Change Image",
                       style: const TextStyle(color: Colors.black54),
                     ),
                   ],
@@ -311,10 +310,9 @@ class DrainagePageState extends State<DrainagePage> {
               duration: const Duration(milliseconds: 1400),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _isUploading || _selectedImage == null
-                          ? Colors.grey
-                          : Colors.black,
+                  backgroundColor: _isUploading || _selectedImage == null
+                      ? Colors.grey
+                      : Colors.black,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                   shape: RoundedRectangleBorder(
@@ -341,8 +339,7 @@ class DrainagePageState extends State<DrainagePage> {
     return InputDecoration(
       filled: true,
       fillColor: Colors.grey[200],
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide.none,

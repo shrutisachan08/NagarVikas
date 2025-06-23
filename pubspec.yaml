@@ -101,7 +101,9 @@ flutter:
      - assets/animals.png
      - assets/selected.png
      - assets/logo.gif
+
      #- assets/nagarvikas-a1d4f-5333217f2ec9.JSON
+    # - assets/nagarvikas-a1d4f-5333217f2ec9.json
      - assets/anonymous.png
      - assets/no_complaints.png
        # To add assets to your application, add an assets section, like this:

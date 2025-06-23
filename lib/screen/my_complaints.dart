@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_database/firebase_database.dart';
-import 'package:intl/intl.dart';
+//import 'package:intl/intl.dart';
 import 'dart:developer' as developer;
 
 class MyComplaintsScreen extends StatefulWidget {
@@ -28,9 +28,9 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
     firebase_auth.FirebaseAuth.instance.authStateChanges().listen((user) {
       if (mounted) {
         setState(() {
-          isAdmin = user != null && 
-                   user.email != null && 
-                   user.email!.toLowerCase().contains("gov");
+          isAdmin = user != null &&
+              user.email != null &&
+              user.email!.toLowerCase().contains("gov");
         });
       }
     });
@@ -42,7 +42,8 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
 
     DatabaseReference ref = FirebaseDatabase.instance.ref('complaints/');
 
-    ref.orderByChild("user_id").equalTo(userId).onValue.listen((event) {
+    // 🛠️ If admin, fetch all complaints
+    ref.onValue.listen((event) {
       final data = event.snapshot.value as Map<dynamic, dynamic>?;
 
       if (data == null) {
@@ -60,27 +61,17 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
       data.forEach((key, value) {
         final complaint = value as Map<dynamic, dynamic>;
 
-        String rawTimestamp = complaint["timestamp"] ?? "";
-        String formattedDate = "Unknown Date";
-        String formattedTime = "Unknown Time";
+        // Parse timestamp logic...
+        // 👇 Add only own complaints if not admin
+        if (!isAdmin && complaint["user_id"] != userId) return;
 
-        try {
-          if (rawTimestamp.isNotEmpty) {
-            DateTime dateTime = DateTime.parse(rawTimestamp);
-            formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
-            formattedTime = DateFormat('hh:mm a').format(dateTime);
-          }
-        } catch (e) {
-          developer.log("Error parsing timestamp: $e");
-        }
-
+        // then push to list
         loadedComplaints.add({
           "id": key,
           "issue": complaint["issue_type"]?.toString() ?? "Unknown Issue",
           "status": complaint["status"]?.toString() ?? "Pending",
           "isFlagged": complaint["isFlagged"] ?? false,
-          "date": formattedDate,
-          "time": formattedTime,
+          "timestamp": complaint["timestamp"] ?? "",
           "location": complaint["location"]?.toString() ?? "Not Available",
           "city": complaint["city"]?.toString() ?? "Not Available",
           "state": complaint["state"]?.toString() ?? "Not Available",
@@ -99,21 +90,24 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
   Future<void> _toggleFlag(String complaintId, bool currentValue) async {
     // Prevent multiple simultaneous updates
     if (_updatingFlags.contains(complaintId)) return;
-    
+
     setState(() {
       _updatingFlags.add(complaintId);
     });
 
     try {
-      DatabaseReference ref = FirebaseDatabase.instance.ref('complaints/$complaintId');
+      DatabaseReference ref =
+          FirebaseDatabase.instance.ref('complaints/$complaintId');
       await ref.update({'isFlagged': !currentValue});
-      
+
       // Show success feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              !currentValue ? 'Complaint flagged for follow-up' : 'Complaint unflagged',
+              !currentValue
+                  ? 'Complaint flagged for follow-up'
+                  : 'Complaint unflagged',
             ),
             backgroundColor: !currentValue ? Colors.orange : Colors.blue,
             duration: const Duration(seconds: 2),
@@ -225,7 +219,7 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                   itemBuilder: (ctx, index) {
                     final complaint = complaints[index];
                     final isUpdating = _updatingFlags.contains(complaint['id']);
-                    
+
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
@@ -253,9 +247,11 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
-                                        color: _getStatusColor(complaint['status']),
+                                        color: _getStatusColor(
+                                            complaint['status']),
                                         borderRadius: BorderRadius.circular(20),
                                         boxShadow: const [
                                           BoxShadow(
@@ -276,10 +272,12 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                     if (complaint['isFlagged'] == true)
                                       Container(
                                         margin: const EdgeInsets.only(left: 8),
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
                                           color: Colors.orange,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         child: const Text(
                                           "Follow-up",
@@ -299,13 +297,19 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                           height: 20,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.orange),
                                           ),
                                         )
                                       : IconButton(
                                           icon: Icon(
-                                            complaint['isFlagged'] ? Icons.star : Icons.star_border,
-                                            color: complaint['isFlagged'] ? Colors.orange : Colors.grey,
+                                            complaint['isFlagged']
+                                                ? Icons.star
+                                                : Icons.star_border,
+                                            color: complaint['isFlagged']
+                                                ? Colors.orange
+                                                : Colors.grey,
                                           ),
                                           onPressed: () {
                                             _toggleFlag(
@@ -313,8 +317,8 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                               complaint['isFlagged'],
                                             );
                                           },
-                                          tooltip: complaint['isFlagged'] 
-                                              ? 'Remove from follow-up' 
+                                          tooltip: complaint['isFlagged']
+                                              ? 'Remove from follow-up'
                                               : 'Mark for follow-up',
                                         ),
                               ],
@@ -344,14 +348,16 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                             Divider(color: Colors.grey[300]),
                             Row(
                               children: [
-                                Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                                Icon(Icons.calendar_today,
+                                    size: 16, color: Colors.grey[600]),
                                 const SizedBox(width: 5),
                                 Text(
                                   complaint['date'],
                                   style: const TextStyle(color: Colors.black54),
                                 ),
                                 const SizedBox(width: 15),
-                                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                                Icon(Icons.access_time,
+                                    size: 16, color: Colors.grey[600]),
                                 const SizedBox(width: 5),
                                 Text(
                                   complaint['time'],
@@ -362,7 +368,8 @@ class MyComplaintsScreenState extends State<MyComplaintsScreen> {
                             const SizedBox(height: 10),
                             Row(
                               children: [
-                                const Icon(Icons.location_on, size: 18, color: Colors.redAccent),
+                                const Icon(Icons.location_on,
+                                    size: 18, color: Colors.redAccent),
                                 const SizedBox(width: 5),
                                 Expanded(
                                   child: Text(

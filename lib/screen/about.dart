@@ -96,7 +96,7 @@ class AboutAppPage extends StatelessWidget {
             ),
           ),
         ],
-     ),
-);
-}
+      ),
+    );
+  }
 }

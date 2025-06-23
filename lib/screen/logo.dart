@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // 🧩 Stateful widget for login page
 class LoginPage extends StatefulWidget {
- const LoginPage({super.key});
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -20,14 +20,11 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // 📝 Controllers for email and password input fields
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // ⏳ Loading state to show progress indicator
   bool isLoading = false;
 
-  /// Handles user authentication and redirects based on role (admin or regular user)
   Future<void> _loginUser() async {
     setState(() {
       isLoading = true;
@@ -43,7 +40,6 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      // 🔓 Firebase email/password login
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -51,29 +47,22 @@ class _LoginPageState extends State<LoginPage> {
 
       User? user = userCredential.user;
 
-      // ✅ Check if email is verified
       if (user != null && !user.emailVerified) {
         Fluttertoast.showToast(
             msg: "Please verify your email before logging in.");
         await _auth.signOut();
-        if (mounted) {
-          setState(() => isLoading = false);
-        }
+        if (mounted) setState(() => isLoading = false);
         return;
       }
 
-      if (mounted) {
-        Fluttertoast.showToast(msg: "Login Successful!");
-      }
+      if (mounted) Fluttertoast.showToast(msg: "Login Successful!");
 
-      // 🛂 If user is an admin (email contains "gov"), show PIN dialog
       if (email.contains("gov")) {
         await Future.delayed(const Duration(milliseconds: 3000));
         if (mounted) {
           _showAdminPinDialog(email);
         }
       } else {
-        // 👉 Navigate to issue selection page for regular users
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -86,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
         Fluttertoast.showToast(
             msg: e.message ?? "Login failed. Please try again.");
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         Fluttertoast.showToast(msg: "An unexpected error occurred.");
       }
@@ -99,7 +88,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // 🔐 Displays PIN prompt for admin verification before accessing dashboard
   void _showAdminPinDialog(String email) {
     if (!mounted) return;
     TextEditingController pinController = TextEditingController();
@@ -124,37 +112,33 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
           actions: [
-            // ❌ Cancel button to close dialog
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
               },
               child: const Text("Cancel"),
             ),
-            // ✅ Submit button to verify PIN
             TextButton(
               onPressed: () async {
                 if (pinController.text == "2004") {
-                  // Store references to contexts before async operations
                   final navigator = Navigator.of(dialogContext);
                   final mainNavigator = Navigator.of(context);
-                  
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
                   await prefs.setBool("isAdmin", true);
-                  
-                  // Use stored navigator references instead of contexts
+
                   if (navigator.canPop()) {
                     navigator.pop();
                   }
-                  
-                  // Use stored navigator reference and check mounted state
+
                   if (mounted) {
                     mainNavigator.pushReplacement(
-                      MaterialPageRoute(builder: (context) => const AdminDashboard()),
+                      MaterialPageRoute(
+                          builder: (context) => const AdminDashboard()),
                     );
                   }
                 } else {
-                  // 🔒 Handle incorrect PIN entry
                   Fluttertoast.showToast(msg: "Incorrect PIN! Access Denied.");
                 }
               },
@@ -166,7 +150,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // 🔑 Forgot password logic using Firebase reset email
   Future<void> _forgotPassword() async {
     String email = _emailController.text.trim();
     if (email.isEmpty) {
@@ -177,12 +160,11 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await _auth.sendPasswordResetEmail(email: email);
       Fluttertoast.showToast(msg: "Password reset link sent to $email");
-    } catch (e) {
+    } catch (_) {
       Fluttertoast.showToast(msg: "Error sending reset email.");
     }
   }
 
-  // 🧱 UI layout and animations 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,8 +173,6 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: [
             const SizedBox(height: 80),
-
-            // 👋 Welcome text with fade-in effect
             FadeInUp(
               duration: const Duration(milliseconds: 1000),
               child: const Text(
@@ -201,15 +181,11 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 10),
-
-            // 🖼️ Login illustration with entry animation for better UX
             ZoomIn(
               duration: const Duration(milliseconds: 1200),
               child: Image.asset("assets/login.png", height: 250, width: 250),
             ),
             const SizedBox(height: 30),
-
-            // 📧 Email input field
             FadeInUp(
               duration: const Duration(milliseconds: 1200),
               child: Padding(
@@ -234,8 +210,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 15),
-
-            // 🔒 Password input field with fade-in effect
             FadeInUp(
               duration: const Duration(milliseconds: 1300),
               child: Padding(
@@ -259,8 +233,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-
-            // ❓ Forgot password button with fade-in effect
             FadeInUp(
               duration: const Duration(milliseconds: 1300),
               child: Padding(
@@ -282,15 +254,13 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // 🚪 Login button with fade-in effect
             FadeInUp(
               duration: const Duration(milliseconds: 1400),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 100, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -307,18 +277,16 @@ class _LoginPageState extends State<LoginPage> {
                       ),
               ),
             ),
-
             const SizedBox(height: 15),
-
-            // 🆕 Signup navigation with fade-in effect
             FadeInUp(
               duration: const Duration(milliseconds: 1500),
               child: TextButton(
                 onPressed: () {
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const RegisterScreen()));
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const RegisterScreen()),
+                  );
                 },
                 child: const Text(
                   "Don't have an account? Signup",
@@ -328,7 +296,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
-     ),
-);
-}
+      ),
+    );
+  }
 }

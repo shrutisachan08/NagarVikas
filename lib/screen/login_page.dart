@@ -138,19 +138,21 @@ class LoginPageState extends State<LoginPage> {
                   // Store references to contexts before async operations
                   final navigator = Navigator.of(dialogContext);
                   final mainNavigator = Navigator.of(context);
-                  
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
                   await prefs.setBool("isAdmin", true);
-                  
+
                   // Use stored navigator references instead of contexts
                   if (navigator.canPop()) {
                     navigator.pop();
                   }
-                  
+
                   // Use stored navigator reference and check mounted state
                   if (mounted) {
                     mainNavigator.pushReplacement(
-                      MaterialPageRoute(builder: (context) => const AdminDashboard()),
+                      MaterialPageRoute(
+                          builder: (context) => const AdminDashboard()),
                     );
                   }
                 } else {
@@ -182,7 +184,7 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  // 🧱 UI layout and animations 
+  // 🧱 UI layout and animations
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -289,8 +291,8 @@ class LoginPageState extends State<LoginPage> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 100, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -328,7 +330,7 @@ class LoginPageState extends State<LoginPage> {
             ),
           ],
         ),
-     ),
-);
-}
+      ),
+    );
+  }
 }

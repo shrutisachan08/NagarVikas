@@ -51,12 +51,15 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
     final settings = await messaging.getNotificationSettings();
 
     if (mounted) {
-      if (settings.authorizationStatus == AuthorizationStatus.authorized && !hasShownToast) {
+      if (settings.authorizationStatus == AuthorizationStatus.authorized &&
+          !hasShownToast) {
         Fluttertoast.showToast(msg: "Notifications Enabled");
         await prefs.setBool('hasShownToast', true);
-      } else if (settings.authorizationStatus != AuthorizationStatus.authorized) {
+      } else if (settings.authorizationStatus !=
+          AuthorizationStatus.authorized) {
         final newSettings = await messaging.requestPermission();
-        if (newSettings.authorizationStatus == AuthorizationStatus.authorized && !hasShownToast) {
+        if (newSettings.authorizationStatus == AuthorizationStatus.authorized &&
+            !hasShownToast) {
           Fluttertoast.showToast(msg: "Notifications Enabled");
           await prefs.setBool('hasShownToast', true);
         }
@@ -71,7 +74,8 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
     final token = await FirebaseMessaging.instance.getToken();
     if (token == null) return;
 
-    final userRef = FirebaseDatabase.instance.ref("users/\${user.uid}/fcmToken");
+    final userRef =
+        FirebaseDatabase.instance.ref("users/\${user.uid}/fcmToken");
     final event = await userRef.once();
     final existingToken = event.snapshot.value as String?;
 
@@ -93,9 +97,7 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
           child: const Text(
             "What type of issue are you facing?",
             style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.w900),
+                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w900),
           ),
         ),
         centerTitle: true,
@@ -112,36 +114,48 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
                 mainAxisSpacing: 20,
                 children: [
                   ZoomIn(
-                    delay: const Duration(milliseconds: 200),
-                    child: buildIssueCard(context, "No garbage lifting in my area.",
-                        "assets/garbage.png", const GarbagePage())),
+                      delay: const Duration(milliseconds: 200),
+                      child: buildIssueCard(
+                          context,
+                          "No garbage lifting in my area.",
+                          "assets/garbage.png",
+                          const GarbagePage())),
                   ZoomIn(
-                    delay: const Duration(milliseconds: 400),
-                    child: buildIssueCard(context, "No water supply in my area.",
-                        "assets/water.png", const WaterPage())),
+                      delay: const Duration(milliseconds: 400),
+                      child: buildIssueCard(
+                          context,
+                          "No water supply in my area.",
+                          "assets/water.png",
+                          const WaterPage())),
                   ZoomIn(
-                    delay: const Duration(milliseconds: 600),
-                    child: buildIssueCard(context, "Road damage in my area.",
-                        "assets/road.png", const RoadPage())),
+                      delay: const Duration(milliseconds: 600),
+                      child: buildIssueCard(context, "Road damage in my area.",
+                          "assets/road.png", const RoadPage())),
                   ZoomIn(
-                    delay: const Duration(milliseconds: 800),
-                    child: buildIssueCard(
-                        context,
-                        "Streetlights not working in my area.",
-                        "assets/streetlight.png",
-                        const StreetLightPage())),
+                      delay: const Duration(milliseconds: 800),
+                      child: buildIssueCard(
+                          context,
+                          "Streetlights not working in my area.",
+                          "assets/streetlight.png",
+                          const StreetLightPage())),
                   ZoomIn(
-                    delay: const Duration(milliseconds: 1000),
-                    child: buildIssueCard(context, "Stray animals issue in my area.",
-                        "assets/animals.png", const AnimalsPage())),
+                      delay: const Duration(milliseconds: 1000),
+                      child: buildIssueCard(
+                          context,
+                          "Stray animals issue in my area.",
+                          "assets/animals.png",
+                          const AnimalsPage())),
                   ZoomIn(
-                    delay: const Duration(milliseconds: 1200),
-                    child: buildIssueCard(context, "Blocked drainage in my area.",
-                        "assets/drainage.png", const DrainagePage())),
+                      delay: const Duration(milliseconds: 1200),
+                      child: buildIssueCard(
+                          context,
+                          "Blocked drainage in my area.",
+                          "assets/drainage.png",
+                          const DrainagePage())),
                   ZoomIn(
-                    delay: const Duration(milliseconds: 1400),
-                    child: buildIssueCard(context, "Facing any other issue.",
-                        "assets/newentry.png", const NewEntryPage())),
+                      delay: const Duration(milliseconds: 1400),
+                      child: buildIssueCard(context, "Facing any other issue.",
+                          "assets/newentry.png", const NewEntryPage())),
                 ],
               ),
             ),
@@ -197,8 +211,8 @@ class _IssueSelectionPageState extends State<IssueSelectionPage> {
               child: Text(
                 text,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 14, fontWeight: FontWeight.w500),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
             ),
           ],
@@ -254,13 +268,20 @@ class CustomAppDrawer extends StatelessWidget {
             child: Text("NagarVikas",
                 style: TextStyle(fontSize: 24, color: Colors.black)),
           ),
-          buildDrawerItem(context, Icons.person, "Profile", const ProfilePage()),
-          buildDrawerItem(context, Icons.history, "My Complaints",  MyComplaintsScreen()),
-          buildDrawerItem(context, Icons.favorite, "User Feedback", const FeedbackPage()),
-          buildDrawerItem(context, Icons.card_giftcard, "Refer and Earn", const ReferAndEarnPage()),
-          buildDrawerItem(context, Icons.report_problem, "Facing Issues in App", const FacingIssuesPage()),
-          buildDrawerItem(context, Icons.info, "About App", const AboutAppPage()),
-          buildDrawerItem(context, Icons.headset_mic, "Contact Us", const ContactUsPage()),
+          buildDrawerItem(
+              context, Icons.person, "Profile", const ProfilePage()),
+          buildDrawerItem(
+              context, Icons.history, "My Complaints", MyComplaintsScreen()),
+          buildDrawerItem(
+              context, Icons.favorite, "User Feedback", const FeedbackPage()),
+          buildDrawerItem(context, Icons.card_giftcard, "Refer and Earn",
+              const ReferAndEarnPage()),
+          buildDrawerItem(context, Icons.report_problem, "Facing Issues in App",
+              const FacingIssuesPage()),
+          buildDrawerItem(
+              context, Icons.info, "About App", const AboutAppPage()),
+          buildDrawerItem(
+              context, Icons.headset_mic, "Contact Us", const ContactUsPage()),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text("Logout"),
@@ -300,7 +321,8 @@ class CustomAppDrawer extends StatelessWidget {
   }
 }
 
-Widget buildDrawerItem(BuildContext context, IconData icon, String title, Widget page) {
+Widget buildDrawerItem(
+    BuildContext context, IconData icon, String title, Widget page) {
   return ListTile(
     leading: Icon(icon),
     title: Text(title),

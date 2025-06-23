@@ -48,6 +48,7 @@ void main() async {
         messagingSenderId: "847955234719",
         appId: "1:847955234719:web:ac2b6da7a3a0715adfb7aa",
         measurementId: "G-ZZMV642TW3",
+        databaseURL: "https://nagarvikas-a1d4f.firebaseio.com",
       ),
     );
   } else {
@@ -219,10 +220,10 @@ class HomeScreen extends StatelessWidget {
 Future<void> handleAdminLogin(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool('isAdmin', true);
-  
+
   if (context.mounted) {
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => const AdminDashboard()));
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (context) => const AdminDashboard()));
   }
 }
 
@@ -231,10 +232,9 @@ Future<void> handleLogout(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove('isAdmin');
   await firebase_auth.FirebaseAuth.instance.signOut();
-  
+
   if (context.mounted) {
-    Navigator.pushReplacement(
-        context,
+    Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (context) => const login.LoginPage()));
   }
 }
@@ -311,7 +311,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     setState(() {
       _isLoading = true;
     });
-    
+
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         Navigator.push(
@@ -379,7 +379,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 133, 207, 239).withValues(alpha: 0.8),
+                    color: const Color.fromARGB(255, 133, 207, 239)
+                        .withValues(alpha: 0.8),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -441,7 +442,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                 onPressed: _isLoading ? null : _onGetStartedPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 8, 8, 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 90, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 90, vertical: 15),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),

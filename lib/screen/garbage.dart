@@ -46,7 +46,8 @@ class GarbagePageState extends State<GarbagePage> {
   void _requestPermissions() async {
     var status = await Permission.microphone.request();
     if (status.isDenied) {
-      Fluttertoast.showToast(msg: "Microphone permission is required for voice input.");
+      Fluttertoast.showToast(
+          msg: "Microphone permission is required for voice input.");
     }
   }
 
@@ -73,7 +74,8 @@ class GarbagePageState extends State<GarbagePage> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (!mounted) return;
     if (pickedFile != null) {
       setState(() {
@@ -99,7 +101,8 @@ class GarbagePageState extends State<GarbagePage> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      Fluttertoast.showToast(msg: "Location permissions are permanently denied.");
+      Fluttertoast.showToast(
+          msg: "Location permissions are permanently denied.");
       return;
     }
 
@@ -110,9 +113,11 @@ class GarbagePageState extends State<GarbagePage> {
     if (!mounted) return;
 
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
       Placemark place = placemarks[0];
-      String address = "${place.subLocality}, ${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+      String address =
+          "${place.subLocality}, ${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
 
       setState(() {
         _locationController.text = address;
@@ -121,7 +126,8 @@ class GarbagePageState extends State<GarbagePage> {
       Fluttertoast.showToast(msg: "Failed to get address.");
       if (!mounted) return;
       setState(() {
-        _locationController.text = "${position.latitude}, ${position.longitude}";
+        _locationController.text =
+            "${position.latitude}, ${position.longitude}";
       });
     }
   }
@@ -129,7 +135,8 @@ class GarbagePageState extends State<GarbagePage> {
   Future<String?> _uploadImageToCloudinary(File imageFile) async {
     String cloudName = "dved2q851";
     String uploadPreset = "flutter_uploads";
-    String cloudinaryUrl = "https://api.cloudinary.com/v1_1/$cloudName/image/upload";
+    String cloudinaryUrl =
+        "https://api.cloudinary.com/v1_1/$cloudName/image/upload";
 
     FormData formData = FormData.fromMap({
       "file": await MultipartFile.fromFile(imageFile.path),
@@ -158,7 +165,8 @@ class GarbagePageState extends State<GarbagePage> {
       String? imageUrl = await _uploadImageToCloudinary(_selectedImage!);
       if (imageUrl == null) throw Exception("Image upload failed.");
 
-      DatabaseReference complaintsRef = FirebaseDatabase.instance.ref("complaints");
+      DatabaseReference complaintsRef =
+          FirebaseDatabase.instance.ref("complaints");
       await complaintsRef.push().set({
         'user_id': FirebaseAuth.instance.currentUser?.uid,
         'issue_type': "Garbage",
@@ -173,7 +181,8 @@ class GarbagePageState extends State<GarbagePage> {
 
       Fluttertoast.showToast(msg: "Complaint submitted successfully!");
       if (!mounted) return;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const DoneScreen()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const DoneScreen()));
     } catch (e) {
       Fluttertoast.showToast(msg: "Error submitting complaint.");
     } finally {
@@ -219,7 +228,8 @@ class GarbagePageState extends State<GarbagePage> {
             const SizedBox(height: 10),
             ZoomIn(
               duration: const Duration(milliseconds: 1200),
-              child: Image.asset("assets/selected.png", height: 210, width: 210),
+              child:
+                  Image.asset("assets/selected.png", height: 210, width: 210),
             ),
             const SizedBox(height: 10),
 
@@ -278,7 +288,8 @@ class GarbagePageState extends State<GarbagePage> {
               decoration: _inputDecoration().copyWith(
                 hintText: "Enter description with contact number or speak",
                 suffixIcon: IconButton(
-                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none, color: Colors.black),
+                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none,
+                      color: Colors.black),
                   onPressed: _isListening ? _stopListening : _startListening,
                 ),
               ),
@@ -293,7 +304,9 @@ class GarbagePageState extends State<GarbagePage> {
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
-                  border: _selectedImage == null ? Border.all(color: Colors.red, width: 2) : null,
+                  border: _selectedImage == null
+                      ? Border.all(color: Colors.red, width: 2)
+                      : null,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -322,14 +335,23 @@ class GarbagePageState extends State<GarbagePage> {
               duration: const Duration(milliseconds: 1400),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _isUploading || _selectedImage == null ? Colors.grey : Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  backgroundColor: _isUploading || _selectedImage == null
+                      ? Colors.grey
+                      : Colors.black,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: _selectedImage == null || _isUploading ? null : _submitForm,
+                onPressed:
+                    _selectedImage == null || _isUploading ? null : _submitForm,
                 child: _isUploading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Submit", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    : const Text("Submit",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)),
               ),
             ),
           ],

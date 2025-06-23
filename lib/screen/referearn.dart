@@ -8,7 +8,7 @@ class ReferAndEarnPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         title: const Text("Refer & Earn"),
         backgroundColor: const Color.fromARGB(255, 4, 204, 240),
       ),
@@ -23,7 +23,9 @@ class ReferAndEarnPage extends StatelessWidget {
             const Text(
               "Invite Your Friends!",
               style: TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepPurpleAccent),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurpleAccent),
             ),
             const SizedBox(height: 10),
 
@@ -46,7 +48,9 @@ class ReferAndEarnPage extends StatelessWidget {
               child: Text(
                 referralCode,
                 style: const TextStyle(
-                    fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepPurpleAccent),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurpleAccent),
               ),
             ),
 
@@ -58,7 +62,8 @@ class ReferAndEarnPage extends StatelessWidget {
                 // Show a confirmation message
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text("Referral code copied! Share it with your friends."),
+                    content: Text(
+                        "Referral code copied! Share it with your friends."),
                     duration: Duration(seconds: 2),
                     backgroundColor: Color.fromARGB(255, 7, 7, 7),
                   ),
@@ -68,14 +73,16 @@ class ReferAndEarnPage extends StatelessWidget {
               label: const Text("Share Referral Code",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                 backgroundColor: const Color.fromARGB(255, 7, 230, 107),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],
         ),
-     ),
+      ),
     );
   }
 }

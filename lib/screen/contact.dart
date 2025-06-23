@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactUsPage extends StatelessWidget {
-  final String phoneNumber = "+917307858026";  // Replace with your phone number
-  final String email = "support@nagarvikas.com";  // Replace with your support email
+  final String phoneNumber = "+917307858026"; // Replace with your phone number
+  final String email =
+      "support@nagarvikas.com"; // Replace with your support email
 
   const ContactUsPage({super.key});
 

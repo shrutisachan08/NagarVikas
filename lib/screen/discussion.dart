@@ -4,7 +4,6 @@ import 'package:firebase_database/firebase_database.dart';
 
 class DiscussionForum extends StatefulWidget {
   const DiscussionForum({super.key});
-
   @override
   DiscussionForumState createState() => DiscussionForumState();
 }
@@ -74,7 +73,8 @@ class DiscussionForumState extends State<DiscussionForum> {
             child: StreamBuilder(
               stream: _messagesRef.orderByChild("timestamp").onValue,
               builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-                if (!snapshot.hasData || snapshot.data?.snapshot.value == null) {
+                if (!snapshot.hasData ||
+                    snapshot.data?.snapshot.value == null) {
                   return Center(child: Text("No messages yet!"));
                 }
 
@@ -86,7 +86,8 @@ class DiscussionForumState extends State<DiscussionForum> {
                         {"key": e.key, ...Map<String, dynamic>.from(e.value)})
                     .toList();
 
-                messagesList.sort((a, b) => a["timestamp"].compareTo(b["timestamp"]));
+                messagesList
+                    .sort((a, b) => a["timestamp"].compareTo(b["timestamp"]));
 
                 return ListView.builder(
                   controller: _scrollController,

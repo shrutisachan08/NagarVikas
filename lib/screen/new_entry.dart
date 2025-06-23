@@ -243,11 +243,11 @@ class NewEntryPageState extends State<NewEntryPage> {
       });
 
       Fluttertoast.showToast(msg: "Complaint submitted successfully!");
-      
+
       // Fixed: Check if widget is still mounted before using context
       if (mounted) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const DoneScreen()));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const DoneScreen()));
       }
     } catch (e) {
       Fluttertoast.showToast(msg: "Error submitting complaint.");
@@ -332,7 +332,8 @@ class NewEntryPageState extends State<NewEntryPage> {
               decoration: _inputDecoration().copyWith(
                 hintText: "Enter location manually or click icon",
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.my_location, color: Color.fromARGB(255, 5, 5, 5)),
+                  icon: const Icon(Icons.my_location,
+                      color: Color.fromARGB(255, 5, 5, 5)),
                   onPressed: _getCurrentLocation,
                 ),
               ),
@@ -389,22 +390,30 @@ class NewEntryPageState extends State<NewEntryPage> {
 
             const SizedBox(height: 10),
             // Submit Button
-           FadeInUp(
+            FadeInUp(
               duration: const Duration(milliseconds: 1400),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _isUploading ? Colors.grey : (_selectedImage == null ? Colors.grey : Colors.black),
-                  padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                  backgroundColor: _isUploading
+                      ? Colors.grey
+                      : (_selectedImage == null ? Colors.grey : Colors.black),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: _selectedImage == null || _isUploading ? null : () async {
-                  _submitForm();
-                },
+                onPressed: _selectedImage == null || _isUploading
+                    ? null
+                    : () async {
+                        _submitForm();
+                      },
                 child: _isUploading
                     ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Submit", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    : const Text("Submit",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)),
               ),
             ),
           ],

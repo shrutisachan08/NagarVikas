@@ -249,10 +249,10 @@ class RoadPageState extends State<RoadPage> {
       });
 
       Fluttertoast.showToast(msg: "Complaint submitted successfully!");
-      
+
       // Check if widget is still mounted before navigation
       if (!mounted) return;
-      
+
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const DoneScreen()));
     } catch (e) {
@@ -340,7 +340,8 @@ class RoadPageState extends State<RoadPage> {
               decoration: _inputDecoration().copyWith(
                 hintText: "Enter location manually or click icon",
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.my_location, color: Color.fromARGB(255, 6, 6, 6)),
+                  icon: const Icon(Icons.my_location,
+                      color: Color.fromARGB(255, 6, 6, 6)),
                   onPressed: _getCurrentLocation,
                 ),
               ),
@@ -401,18 +402,26 @@ class RoadPageState extends State<RoadPage> {
               duration: const Duration(milliseconds: 1400),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _isUploading ? Colors.grey : (_selectedImage == null ? Colors.grey : Colors.black),
-                  padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                  backgroundColor: _isUploading
+                      ? Colors.grey
+                      : (_selectedImage == null ? Colors.grey : Colors.black),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: _selectedImage == null || _isUploading ? null : () async {
-                  _submitForm();
-                },
+                onPressed: _selectedImage == null || _isUploading
+                    ? null
+                    : () async {
+                        _submitForm();
+                      },
                 child: _isUploading
                     ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Submit", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    : const Text("Submit",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)),
               ),
             ),
           ],

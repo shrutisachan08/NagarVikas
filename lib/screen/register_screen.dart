@@ -56,7 +56,8 @@ class RegisterScreenState extends State<RegisterScreen> {
 
     // Check if password meets criteria
     if (!hasMinLength || !hasUppercase || !hasSpecialChar) {
-      Fluttertoast.showToast(msg: "Password does not meet the required criteria.");
+      Fluttertoast.showToast(
+          msg: "Password does not meet the required criteria.");
       return;
     }
 
@@ -66,7 +67,8 @@ class RegisterScreenState extends State<RegisterScreen> {
 
     try {
       // ✅ Create user using Firebase Authentication
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: password,
       );
@@ -80,8 +82,10 @@ class RegisterScreenState extends State<RegisterScreen> {
         "email": _emailController.text.trim(),
       });
 
-      Fluttertoast.showToast(msg: "Registration successful! Please verify your email before logging in.");
-      
+      Fluttertoast.showToast(
+          msg:
+              "Registration successful! Please verify your email before logging in.");
+
       await _auth.signOut(); // Sign out the user after registration
       await Future.delayed(const Duration(seconds: 2));
 
@@ -124,10 +128,10 @@ class RegisterScreenState extends State<RegisterScreen> {
     try {
       await _auth.signInAnonymously();
       Fluttertoast.showToast(msg: "Signed in as Guest");
-      
+
       // Check if widget is still mounted before using BuildContext
       if (!mounted) return;
-      
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const IssueSelectionPage()),
@@ -137,7 +141,7 @@ class RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  /// Builds the registration UI with animation, input fields, 
+  /// Builds the registration UI with animation, input fields,
   /// and buttons for registration and guest login.
   @override
   Widget build(BuildContext context) {
@@ -186,7 +190,8 @@ class RegisterScreenState extends State<RegisterScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.blue, width: 2),
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 2),
                     ),
                   ),
                 ),
@@ -211,7 +216,8 @@ class RegisterScreenState extends State<RegisterScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.blue, width: 2),
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 2),
                     ),
                   ),
                 ),
@@ -237,7 +243,8 @@ class RegisterScreenState extends State<RegisterScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.blue, width: 2),
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 2),
                     ),
                   ),
                 ),
@@ -251,15 +258,18 @@ class RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   ZoomIn(
                     duration: const Duration(milliseconds: 800),
-                    child: buildPasswordValidationItem("At least 8 characters", hasMinLength),
+                    child: buildPasswordValidationItem(
+                        "At least 8 characters", hasMinLength),
                   ),
                   ZoomIn(
                     duration: const Duration(milliseconds: 800),
-                    child: buildPasswordValidationItem("At least 1 uppercase letter", hasUppercase),
+                    child: buildPasswordValidationItem(
+                        "At least 1 uppercase letter", hasUppercase),
                   ),
                   ZoomIn(
                     duration: const Duration(milliseconds: 800),
-                    child: buildPasswordValidationItem("At least 1 special character", hasSpecialChar),
+                    child: buildPasswordValidationItem(
+                        "At least 1 special character", hasSpecialChar),
                   ),
                 ],
               ),
@@ -272,13 +282,19 @@ class RegisterScreenState extends State<RegisterScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 100, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: isLoading ? null : _registerUser,
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Register", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                      : const Text("Register",
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                 ),
               ),
 
@@ -290,9 +306,14 @@ class RegisterScreenState extends State<RegisterScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _continueAsGuest,
                   icon: Image.asset("assets/anonymous.png", height: 24),
-                  label: const Text("Continue as Guest", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
+                  label: const Text("Continue as Guest",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black)),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 12),
                     side: const BorderSide(color: Colors.black, width: 2),
                     backgroundColor: Colors.white,
                   ),
@@ -306,9 +327,13 @@ class RegisterScreenState extends State<RegisterScreen> {
                 duration: const Duration(milliseconds: 2200),
                 child: TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()));
                   },
-                  child: const Text("Already have an account? Log in", style: TextStyle(fontSize: 16)),
+                  child: const Text("Already have an account? Log in",
+                      style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],
@@ -322,9 +347,11 @@ class RegisterScreenState extends State<RegisterScreen> {
   Widget buildPasswordValidationItem(String text, bool isValid) {
     return Row(
       children: [
-        Icon(isValid ? Icons.check_circle : Icons.cancel, color: isValid ? Colors.green : Colors.red, size: 18),
+        Icon(isValid ? Icons.check_circle : Icons.cancel,
+            color: isValid ? Colors.green : Colors.red, size: 18),
         const SizedBox(width: 8),
-        Text(text, style: TextStyle(color: isValid ? Colors.green : Colors.red)),
+        Text(text,
+            style: TextStyle(color: isValid ? Colors.green : Colors.red)),
       ],
     );
   }
