@@ -6,10 +6,10 @@ class FeedbackPage extends StatefulWidget {
   const FeedbackPage({super.key});
 
   @override
-  FeedbackPageState createState() => FeedbackPageState();
+  _FeedbackPageState createState() => _FeedbackPageState();
 }
 
-class FeedbackPageState extends State<FeedbackPage> {
+class _FeedbackPageState extends State<FeedbackPage> {
   // ⭐ User rating value (0.0 to 5.0)
   double _rating = 0.0;
 
@@ -23,7 +23,7 @@ class FeedbackPageState extends State<FeedbackPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Feedback'),
+        title: Text('Feedback'),
         backgroundColor: const Color.fromARGB(255, 4, 204, 240),
       ),
       body: Padding(
@@ -31,15 +31,15 @@ class FeedbackPageState extends State<FeedbackPage> {
         child: ListView(
           children: [
             _buildTitleText('How do you feel about the app?'),
-            const SizedBox(height: 20),
+            SizedBox(height: 20), // 📏 Space between title and stars
             _buildRatingBar(),
-            const SizedBox(height: 25),
+            SizedBox(height: 25), // 📏 Space between rating and next title
             _buildTitleText('Describe your experience:'),
-            const SizedBox(height: 15),
+            SizedBox(height: 15), // 📏 Space before feedback field
             _buildFeedbackTextField(),
-            const SizedBox(height: 25),
+            SizedBox(height: 25), // 📏 Space before checkbox
             _buildSuggestionsCheckbox(),
-            const SizedBox(height: 30),
+            SizedBox(height: 30), // 📏 Space before submit button
             _buildSubmitButton(),
           ],
         ),
@@ -47,10 +47,11 @@ class FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  /// 🧾 Returns a styled title text widget
   Widget _buildTitleText(String text) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w600,
         color: Colors.black87,
@@ -58,6 +59,7 @@ class FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  /// ⭐ Builds a custom star rating bar (1–5)
   Widget _buildRatingBar() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -78,6 +80,7 @@ class FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  /// 📝 Multiline text field for user feedback input
   Widget _buildFeedbackTextField() {
     return TextField(
       controller: _feedbackController,
@@ -86,17 +89,17 @@ class FeedbackPageState extends State<FeedbackPage> {
         filled: true,
         fillColor: Colors.grey[200],
         hintText: 'Share your thoughts...',
-        hintStyle: const TextStyle(color: Colors.black45),
+        hintStyle: TextStyle(color: Colors.black45),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15), // Adjusted padding
       ),
-      style: const TextStyle(color: Colors.black),
+      style: TextStyle(color: Colors.black),
     );
   }
 
+  /// ✅ Checkbox for user to indicate if they have suggestions
   Widget _buildSuggestionsCheckbox() {
     return Row(
       children: [
@@ -109,55 +112,58 @@ class FeedbackPageState extends State<FeedbackPage> {
           },
           activeColor: Colors.amber,
         ),
-        const Expanded(
-          child: Text(
-            'Would you like to give any suggestion?',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
+        Text(
+          'Would you like to give any suggestion?',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
           ),
         ),
       ],
     );
   }
 
+  /// 📤 Submit button to process the feedback
   Widget _buildSubmitButton() {
     return ElevatedButton(
-      onPressed: _submitFeedback,
+      onPressed: () {
+        _submitFeedback(); // 🧾 Trigger submission logic
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.amber,
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        padding: EdgeInsets.symmetric(vertical: 18), // Adjusted padding
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
-      child: const Text('Submit Feedback'),
+      child: Text('Submit Feedback', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
     );
   }
 
+  /// 🚀 Handles feedback submission and shows confirmation
   void _submitFeedback() {
-    final String feedback = _feedbackController.text;
+    String feedback = _feedbackController.text;
+    print('Rating: $_rating');
+    print('Feedback: $feedback');
+    print('Suggestions: $_suggestions');
 
-    // 🧾 Logging using debugPrint (use logger package in production)
-    debugPrint('Rating: $_rating');
-    debugPrint('Feedback: $feedback');
-    debugPrint('Suggestions: $_suggestions');
-
+    // ✅ Show a thank-you dialog
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Thank You!'),
-          content: const Text('Your feedback has been submitted.'),
+          title: Text('Thank You!'),
+          content: Text('Your feedback has been submitted.'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Close'),
             ),
           ],
         );
-      },
-    );
-  }
+     },
+);
+}
 }

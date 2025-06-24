@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactUsPage extends StatelessWidget {
-  final String phoneNumber = "+917307858026"; // Replace with your phone number
-  final String email =
-      "support@nagarvikas.com"; // Replace with your support email
+  final String phoneNumber = "+917307858026";  // Replace with your phone number
+  final String email = "support@nagarvikas.com";
 
-  const ContactUsPage({super.key});
+  const ContactUsPage({super.key});  // Replace with your support email
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +27,13 @@ class ContactUsPage extends StatelessWidget {
             _buildContactTile(
               icon: Icons.phone,
               text: phoneNumber,
-              onTap: _launchPhoneDialer,
+              onTap: () => _launchPhoneDialer(),
             ),
             SizedBox(height: 20),
             _buildContactTile(
               icon: Icons.email,
               text: email,
-              onTap: _launchEmailClient,
+              onTap: () => _launchEmailClient(),
             ),
           ],
         ),
@@ -42,13 +41,9 @@ class ContactUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildContactTile({
-    required IconData icon,
-    required String text,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildContactTile({required IconData icon, required String text, required Function onTap}) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => onTap(),
       child: Card(
         color: Colors.amberAccent,
         shape: RoundedRectangleBorder(
@@ -71,8 +66,9 @@ class ContactUsPage extends StatelessWidget {
   }
 
   // Function to launch the phone dialer
-  void _launchPhoneDialer() async {
+  _launchPhoneDialer() async {
     final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+
     if (await canLaunchUrl(phoneUri)) {
       await launchUrl(phoneUri);
     } else {
@@ -81,16 +77,47 @@ class ContactUsPage extends StatelessWidget {
   }
 
   // Function to launch the email client
-  void _launchEmailClient() async {
-    final Uri emailUri = Uri(
+  _launchEmailClient() async {
+    final String subject = 'Support Request - Nagar Vikas';
+    final String body = 'Hi team,\n\nI need help with ';
+
+    final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: email,
-      query: 'subject=Support Needed&body=Hello NagarVikas Support Team,',
+      queryParameters: {
+        'subject': subject,
+        'body': body,
+      },
     );
-    if (await canLaunchUrl(emailUri)) {
-      await launchUrl(emailUri);
-    } else {
-      throw 'Could not launch $emailUri';
+
+    String emailUrl = emailLaunchUri.toString();
+
+    // Replace + with %20 to fix space encoding for mailto
+    emailUrl = emailUrl.replaceAll('+', '%20');
+
+    try {
+      final bool launched = await launchUrl(
+        Uri.parse(emailUrl),
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        // Gmail fallback
+        final fallbackUrl = Uri.parse(
+          'https://mail.google.com/mail/?view=cm&fs=1'
+              '&to=${Uri.encodeComponent(email)}'
+              '&su=${Uri.encodeComponent(subject)}'
+              '&body=${Uri.encodeComponent(body)}',
+        );
+
+        if (await canLaunchUrl(fallbackUrl)) {
+          await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
+        } else {
+          throw 'No email app or Gmail available.';
+        }
+      }
+    } catch (e) {
+      debugPrint('Email launch error: $e');
     }
   }
 }

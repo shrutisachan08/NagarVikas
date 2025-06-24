@@ -1,302 +1,142 @@
-// 📦 Required packages and internal imports
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:nagar_vikas/screen/issue_selection.dart';
-import 'package:nagar_vikas/screen/register_screen.dart';
-import 'package:nagar_vikas/screen/admin_dashboard.dart';
-import 'package:animate_do/animate_do.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
-// 🧩 Stateful widget for login page
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+/// LogoWidget
+/// A splash/logo animation screen with fade-in and scale-up effects.
+/// Includes:
+/// - App icon animation
+/// - Typewriter text animation for branding
+/// - Circular progress indicator with a redirect message
+/// - Optional redirect logic (currently simulated)
 
+class LogoWidget extends StatefulWidget {
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  _LogoWidgetState createState() => _LogoWidgetState();
 }
 
-// 🧠 Login page logic and UI state
-class _LoginPageState extends State<LoginPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+class _LogoWidgetState extends State<LogoWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeIn;
+  late Animation<double> _scaleUp;
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
 
-  bool isLoading = false;
-
-  Future<void> _loginUser() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      String email = _emailController.text.trim();
-      String password = _passwordController.text.trim();
-
-      if (email.isEmpty || password.isEmpty) {
-        Fluttertoast.showToast(msg: "Please enter both email and password");
-        setState(() => isLoading = false);
-        return;
-      }
-
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      User? user = userCredential.user;
-
-      if (user != null && !user.emailVerified) {
-        Fluttertoast.showToast(
-            msg: "Please verify your email before logging in.");
-        await _auth.signOut();
-        if (mounted) setState(() => isLoading = false);
-        return;
-      }
-
-      if (mounted) Fluttertoast.showToast(msg: "Login Successful!");
-
-      if (email.contains("gov")) {
-        await Future.delayed(const Duration(milliseconds: 3000));
-        if (mounted) {
-          _showAdminPinDialog(email);
-        }
-      } else {
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const IssueSelectionPage()),
-          );
-        }
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        Fluttertoast.showToast(
-            msg: e.message ?? "Login failed. Please try again.");
-      }
-    } catch (_) {
-      if (mounted) {
-        Fluttertoast.showToast(msg: "An unexpected error occurred.");
-      }
-    }
-
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  void _showAdminPinDialog(String email) {
-    if (!mounted) return;
-    TextEditingController pinController = TextEditingController();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text("Admin Authentication"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Enter Admin PIN to access the dashboard."),
-              TextField(
-                controller: pinController,
-                obscureText: true,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: "Enter 4-digit PIN",
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (pinController.text == "2004") {
-                  final navigator = Navigator.of(dialogContext);
-                  final mainNavigator = Navigator.of(context);
-
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  await prefs.setBool("isAdmin", true);
-
-                  if (navigator.canPop()) {
-                    navigator.pop();
-                  }
-
-                  if (mounted) {
-                    mainNavigator.pushReplacement(
-                      MaterialPageRoute(
-                          builder: (context) => const AdminDashboard()),
-                    );
-                  }
-                } else {
-                  Fluttertoast.showToast(msg: "Incorrect PIN! Access Denied.");
-                }
-              },
-              child: const Text("Submit"),
-            ),
-          ],
-        );
-      },
+    // 🔧 Initialize animation controller
+    _controller = AnimationController(
+      duration: Duration(seconds: 2),
+      vsync: this,
     );
+
+    // 🎨 Fade-in animation (opacity from 0 to 1)
+    _fadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+
+    // 🎯 Scale-up animation (icon size from 60% to 100%)
+    _scaleUp = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
+
+    // ▶️ Start the animation
+    _controller.forward();
+
+    // Simulating a delay before redirection (Replace this with actual navigation)
+    Future.delayed(Duration(seconds: 3), () {
+      print("Redirecting to next screen...");
+      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => NextScreen()));
+    });
   }
 
-  Future<void> _forgotPassword() async {
-    String email = _emailController.text.trim();
-    if (email.isEmpty) {
-      Fluttertoast.showToast(msg: "Please enter your email to reset password.");
-      return;
-    }
-
-    try {
-      await _auth.sendPasswordResetEmail(email: email);
-      Fluttertoast.showToast(msg: "Password reset link sent to $email");
-    } catch (_) {
-      Fluttertoast.showToast(msg: "Error sending reset email.");
-    }
+  @override
+  void dispose() {
+    // ❌ Dispose the controller to avoid memory leaks
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 80),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1000),
-              child: const Text(
-                "Welcome Back!",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-              ),
-            ),
-            const SizedBox(height: 10),
-            ZoomIn(
-              duration: const Duration(milliseconds: 1200),
-              child: Image.asset("assets/login.png", height: 250, width: 250),
-            ),
-            const SizedBox(height: 30),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1200),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: "Email",
-                    labelStyle: const TextStyle(color: Colors.black87),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.black, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.blue, width: 2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 15),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1300),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.black, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.blue, width: 2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1300),
-              child: Padding(
-                padding: const EdgeInsets.only(right: 25),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _forgotPassword,
-                    child: const Text(
-                      "Forgot Password?",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
+      backgroundColor: Colors.white, // 🖼️ Background color of splash screen
+      body: Column(
+        children: [
+          // 📍 Center animation section
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 🌟 Logo Animation: Fade + Scale
+                  FadeTransition(
+                    opacity: _fadeIn,
+                    child: ScaleTransition(
+                      scale: _scaleUp,
+                      child: Image.asset(
+                        'assets/app_icon.png', // 🖼️ App icon
+                        width: 150,
+                        height: 150,
                       ),
                     ),
                   ),
-                ),
+                  SizedBox(height: 50),
+
+                  // 📝 Animated Typewriter Text
+                  AnimatedTextKit(
+                    animatedTexts: [
+                      TypewriterAnimatedText(
+                        'NagarVikas',
+                        textStyle: GoogleFonts.nunito(
+                          fontSize: 35,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                        speed: Duration(milliseconds: 100),
+                      ),
+                      TypewriterAnimatedText(
+                        'Created By Fate.\nEngineered By Prateek Chourasia',
+                        textStyle: GoogleFonts.nunito(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey[800],
+                        ),
+                        textAlign: TextAlign.center,
+                        speed: Duration(milliseconds: 100),
+                      ),
+                    ],
+                    totalRepeatCount: 1, // 🔁 Play animation once
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1400),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+          ),
+
+          // 🔁 Loading Indicator & Redirect Text
+          Padding(
+            padding: const EdgeInsets.only(bottom: 40),
+            child: Column(
+              children: [
+                CircularProgressIndicator(
+                  color:  Colors.red, // 🔴 Indicator color
+                ),
+                SizedBox(height: 15),
+                Text(
+                  "Redirecting...",
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[700],
                   ),
                 ),
-                onPressed: isLoading ? null : _loginUser,
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        "Login",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
-              ),
+              ],
             ),
-            const SizedBox(height: 15),
-            FadeInUp(
-              duration: const Duration(milliseconds: 1500),
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const RegisterScreen()),
-                  );
-                },
-                child: const Text(
-                  "Don't have an account? Signup",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+          ),
+        ],
+     ),
+);
+}
 }
